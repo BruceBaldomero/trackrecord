@@ -15,6 +15,9 @@ npm run dev
 
 Then open http://localhost:3000.
 
+`demo/trackrecord.html` is a standalone single-file copy of the same prototype — open it in a
+browser directly, no install needed. It's for showing people; the Next.js app is the real codebase.
+
 ## What's here
 
 | Route            | What it shows                                                            |

@@ -1,0 +1,945 @@
+<title>Track Record</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400..600&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  :root {
+    --ground: #0a090c;
+    --surface: #121016;
+    --raised: #1a1720;
+    --line: #272430;
+    --line-soft: #1e1b25;
+    --ink: #f6f4f2;
+    --muted: #948fa1;
+    --faint: #615c70;
+    --gold: #e8b64c;
+    --up: #4ade9b;
+
+    --band-1: #8c93a8;
+    --band-2: #a78bfa;
+    --band-3: #2dd4bf;
+    --band-4: #fb923c;
+    --band-5: #f472b6;
+
+    --display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    --body: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --wrap: 1120px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    background-image:
+      radial-gradient(58rem 38rem at 8% -12%, rgba(232, 182, 76, 0.075), transparent 62%),
+      radial-gradient(46rem 34rem at 96% -4%, rgba(167, 139, 250, 0.07), transparent 60%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; cursor: pointer; }
+  ::selection { background: rgba(232, 182, 76, 0.3); }
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+
+  h1, h2, h3 { font-family: var(--display); font-weight: 800; letter-spacing: -0.022em; margin: 0; text-wrap: balance; }
+  .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+  .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 20px; }
+
+  /* ---------- nav ---------- */
+  .nav {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(10, 9, 12, 0.82);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .nav-in { display: flex; align-items: center; gap: 8px; height: 58px; }
+  .brand { display: flex; align-items: center; gap: 10px; margin-right: auto; }
+  .brand-mark {
+    width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
+    background: linear-gradient(150deg, #ffdf94, var(--gold) 55%, #b8801f);
+    color: #201603; font-family: var(--display); font-weight: 800; font-size: 15px;
+  }
+  .brand-name { font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: -0.02em; }
+  .nav a.link { color: var(--muted); padding: 6px 11px; border-radius: 9px; font-size: 14px; }
+  .nav a.link:hover { color: var(--ink); }
+  .nav a.link.on { color: var(--ink); background: rgba(255, 255, 255, 0.07); }
+  .nav .me { margin-left: 6px; border-radius: 999px; box-shadow: 0 0 0 2px transparent; }
+  .nav .me.on { box-shadow: 0 0 0 2px var(--gold); }
+
+  /* ---------- shared bits ---------- */
+  .avatar {
+    border-radius: 999px; display: grid; place-items: center; flex: none;
+    font-family: var(--display); font-weight: 700; color: rgba(255,255,255,0.92);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.11);
+  }
+  .avatar.sq { border-radius: 12px; }
+
+  .eyebrow {
+    font-size: 11.5px; font-weight: 600; letter-spacing: 0.17em; text-transform: uppercase;
+    color: var(--muted); margin: 0 0 16px;
+  }
+  .section { padding: 60px 0; border-top: 1px solid var(--line-soft); }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 20px; }
+  .section-head .eyebrow { margin-bottom: 16px; }
+  .lead { color: var(--muted); max-width: 62ch; }
+
+  .band {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    border-radius: 999px; padding: 2px 9px; font-size: 11.5px; font-weight: 500;
+  }
+  .band .dot { width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+  .band.past { background: rgba(255,255,255,0.05); color: var(--faint); }
+  .arrow { color: var(--faint); }
+
+  .btn {
+    display: inline-block; border-radius: 11px; padding: 10px 18px;
+    font-size: 14px; font-weight: 600; border: 1px solid transparent;
+  }
+  .btn-gold { background: var(--gold); color: #1a1204; }
+  .btn-gold:hover { filter: brightness(1.06); }
+  .btn-ghost { border-color: var(--line); background: var(--surface); color: var(--ink); }
+  .btn-ghost:hover { border-color: rgba(255,255,255,0.24); }
+
+  .panel { border: 1px solid var(--line); border-radius: 16px; background: rgba(18, 16, 22, 0.7); }
+
+  /* ---------- cards ---------- */
+  .tier {
+    --ring: linear-gradient(160deg, #302c3a, #1d1a24 58%, #302c3a);
+    --glow: rgba(0,0,0,0);
+    --chip: #6d6879; --chip-ink: #0c0b0f;
+  }
+  .tier-bronze { --ring: linear-gradient(160deg,#f5c491,#a2591e 42%,#e79b58 76%,#7c4218); --glow: rgba(212,132,52,0.24); --chip:#d08a45; --chip-ink:#22120a; }
+  .tier-silver { --ring: linear-gradient(160deg,#ffffff,#959da8 42%,#e8eff6 74%,#7b828c); --glow: rgba(208,218,228,0.2); --chip:#d2d9e1; --chip-ink:#14161a; }
+  .tier-gold   { --ring: linear-gradient(160deg,#fff2b8,#c68d18 40%,#ffd76b 72%,#96690e); --glow: rgba(232,182,76,0.3); --chip:#f0c351; --chip-ink:#241a04; }
+  .tier-diamond{ --ring: linear-gradient(160deg,#eafcff,#7fd8ff 26%,#c9a7ff 52%,#9ef7e0 76%,#7fd8ff); --glow: rgba(150,220,255,0.34); --chip:#c2f0ff; --chip-ink:#06222b; }
+
+  .card { display: block; }
+  .card-frame {
+    background: var(--ring); padding: 1.5px; border-radius: 17px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.55), 0 18px 40px -26px var(--glow), 0 0 32px -18px var(--glow);
+    transition: transform 180ms ease, box-shadow 220ms ease;
+  }
+  .card:hover .card-frame { transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(0,0,0,0.55), 0 26px 50px -24px var(--glow), 0 0 52px -16px var(--glow); }
+  .card-inner { background: var(--surface); border-radius: 15.5px; overflow: hidden; }
+
+  .card-art { position: relative; aspect-ratio: 4 / 3; display: grid; place-items: center; }
+  .card-art::before {
+    content: ""; position: absolute; inset: 0; opacity: 0.32; mix-blend-mode: overlay;
+    background-image: radial-gradient(rgba(255,255,255,0.18) 0.5px, transparent 0.5px);
+    background-size: 3px 3px;
+  }
+  .tier-gold .sheen::after, .tier-diamond .sheen::after {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(115deg, transparent 33%, rgba(255,255,255,0.12) 47%, transparent 61%);
+  }
+  .card-initials {
+    font-family: var(--display); font-weight: 800; font-size: 34px; letter-spacing: -0.03em;
+    color: rgba(255,255,255,0.9); text-shadow: 0 2px 14px rgba(0,0,0,0.45); position: relative;
+  }
+  .tier-chip {
+    position: absolute; top: 10px; right: 10px;
+    background: var(--chip); color: var(--chip-ink);
+    border-radius: 999px; padding: 2px 8px; font-size: 9.5px; font-weight: 700;
+    letter-spacing: 0.11em; text-transform: uppercase;
+  }
+  .tier-chip.flat { position: static; }
+  .tier-chip.plain { background: rgba(0,0,0,0.55); color: var(--muted); backdrop-filter: blur(6px); }
+  .band-gain {
+    position: absolute; bottom: 10px; left: 10px; background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px); border-radius: 999px; padding: 2px 8px;
+    font-size: 10px; font-weight: 600; color: rgba(255,255,255,0.9);
+  }
+
+  .card-body { padding: 12px; display: flex; flex-direction: column; gap: 9px; }
+  .card-name { font-family: var(--display); font-weight: 700; font-size: 15px; letter-spacing: -0.015em; line-height: 1.2; }
+  .card-sub { font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+  .card-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    border-top: 1px solid var(--line-soft); padding-top: 8px; font-size: 11.5px;
+  }
+  .card-row .mono { color: rgba(246,244,242,0.82); }
+  .growth { font-family: var(--mono); font-weight: 500; color: var(--up); }
+  .card-bands { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; overflow: hidden; }
+  .card-bands .band { font-size: 10.5px; padding: 2px 7px; }
+
+  .card-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+
+  /* ---------- hero ---------- */
+  .hero { display: grid; grid-template-columns: 1.12fr 0.88fr; gap: 48px; align-items: center; padding: 66px 0 72px; }
+  .hero h1 { font-size: clamp(40px, 5.6vw, 66px); line-height: 1.02; max-width: 11ch; }
+  .hero h1 .accent { color: var(--gold); }
+  .hero .lead { margin: 22px 0 0; font-size: 17px; }
+  .hero .lead + .lead { margin-top: 12px; font-size: 15px; }
+  .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 30px; }
+  .tag {
+    display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line);
+    background: var(--surface); border-radius: 999px; padding: 5px 13px;
+    font-size: 12px; color: var(--muted); margin-bottom: 22px;
+  }
+  .tag .dot { width: 6px; height: 6px; border-radius: 999px; background: var(--gold); }
+  .hero-card { position: relative; width: 100%; max-width: 272px; margin: 0 auto; }
+  .hero-card::before {
+    content: ""; position: absolute; inset: -36px; border-radius: 999px; z-index: -1;
+    background: radial-gradient(closest-side, rgba(232,182,76,0.16), transparent);
+  }
+  .hero-cap { text-align: center; font-size: 12px; color: var(--faint); margin-top: 14px; }
+
+  /* ---------- steps / bands / tiers ---------- */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .step { border: 1px solid var(--line); border-radius: 16px; background: rgba(18,16,22,0.6); padding: 20px; }
+  .step-n { font-family: var(--mono); font-size: 12px; color: var(--gold); }
+  .step h3 { font-size: 16px; margin: 12px 0 6px; font-weight: 700; }
+  .step p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .bands { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin-top: 22px; }
+  .band-row { display: flex; align-items: center; gap: 18px; padding: 14px 18px; background: rgba(18,16,22,0.72); }
+  .band-row:nth-child(even) { background: rgba(18,16,22,0.42); }
+  .band-row .n { font-family: var(--mono); font-size: 13px; color: var(--faint); width: 16px; }
+  .band-row .range { margin-left: auto; font-family: var(--mono); font-size: 13px; color: var(--muted); }
+
+  .tiers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .tier-card { padding: 20px; background: var(--surface); border-radius: 15.5px; position: relative; overflow: hidden; }
+  .tier-card h3 { font-size: 19px; margin: 14px 0 5px; }
+  .tier-card p { margin: 0; color: var(--muted); font-size: 13.5px; }
+
+  /* ---------- profile ---------- */
+  .profile-head { display: flex; gap: 22px; align-items: flex-start; flex-wrap: wrap; padding-top: 46px; }
+  .profile-head h1 { font-size: 34px; }
+  .handle { font-family: var(--mono); font-size: 13.5px; color: var(--faint); margin-top: 3px; }
+  .pill-tag { border-radius: 999px; background: rgba(255,255,255,0.07); color: var(--muted); font-size: 10.5px; letter-spacing: 0.11em; text-transform: uppercase; padding: 4px 9px; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 30px; }
+  .stat { border: 1px solid var(--line); border-radius: 13px; background: rgba(18,16,22,0.66); padding: 13px 16px; }
+  .stat .v { font-family: var(--display); font-size: 21px; font-weight: 700; letter-spacing: -0.02em; }
+  .stat .l { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .filters { display: flex; gap: 3px; flex-wrap: wrap; }
+  .filters button { background: none; border: 0; color: var(--muted); font-size: 12.5px; padding: 5px 10px; border-radius: 9px; }
+  .filters button:hover { color: var(--ink); }
+  .filters button.on { background: rgba(255,255,255,0.09); color: var(--ink); }
+  .others { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .other { display: flex; align-items: center; gap: 12px; border: 1px solid var(--line); border-radius: 13px; background: rgba(18,16,22,0.6); padding: 13px 15px; }
+  .other:hover { border-color: rgba(255,255,255,0.22); }
+  .other .n { font-size: 14px; font-weight: 500; }
+  .other .s { font-size: 12px; color: var(--muted); }
+
+  /* ---------- list rows ---------- */
+  .rows { border: 1px solid var(--line); border-radius: 16px; overflow: hidden; }
+  .row { display: flex; align-items: center; gap: 14px; padding: 12px 15px; background: rgba(18,16,22,0.5); border-bottom: 1px solid var(--line-soft); }
+  .row:last-child { border-bottom: 0; }
+  .row:hover { background: rgba(26,23,32,0.85); }
+  .row .grow { min-width: 0; flex: 1; }
+  .row .t { font-size: 14.5px; font-weight: 500; }
+  .row .s { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .row .idx { font-family: var(--mono); font-size: 12.5px; color: var(--faint); width: 16px; }
+  .row.mine { background: rgba(232,182,76,0.07); }
+
+  .back-btn { background: rgba(255,255,255,0.09); border: 0; color: var(--ink); border-radius: 10px; padding: 6px 13px; font-size: 12.5px; font-weight: 600; }
+  .back-btn:hover { background: var(--gold); color: #1a1204; }
+  .back-btn[disabled] { opacity: 0.35; cursor: not-allowed; }
+  .back-btn.done { background: none; border: 1px solid var(--line); color: var(--faint); cursor: default; }
+
+  .search {
+    width: 100%; border: 1px solid var(--line); border-radius: 13px; background: var(--surface);
+    color: var(--ink); font: inherit; padding: 12px 15px; margin-top: 8px;
+  }
+  .search::placeholder { color: var(--faint); }
+  .search:focus { outline: none; border-color: rgba(232,182,76,0.6); }
+
+  .picks { display: flex; align-items: center; justify-content: space-between; gap: 16px; border: 1px solid var(--line); border-radius: 13px; background: rgba(18,16,22,0.6); padding: 11px 16px; margin: 22px 0 4px; font-size: 14px; color: var(--muted); }
+  .picks .pips { display: flex; align-items: center; gap: 6px; }
+  .pip { width: 9px; height: 9px; border-radius: 999px; background: rgba(255,255,255,0.14); }
+  .pip.on { background: var(--gold); }
+  .picks .count { font-family: var(--mono); color: var(--ink); margin-left: 6px; font-size: 13.5px; }
+
+  .flash { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; border: 1px solid rgba(232,182,76,0.42); background: rgba(232,182,76,0.1); border-radius: 13px; padding: 12px 16px; margin-top: 14px; font-size: 14px; }
+
+  /* ---------- card detail ---------- */
+  .detail { display: grid; grid-template-columns: 292px 1fr; gap: 40px; margin-top: 26px; }
+  .receipt { border: 1px solid var(--line); border-radius: 17px; background: rgba(18,16,22,0.72); padding: 26px; }
+  .receipt-line {
+    font-family: var(--display); font-weight: 600; font-size: clamp(20px, 2.3vw, 27px);
+    line-height: 1.32; letter-spacing: -0.02em; margin: 14px 0 0; text-wrap: balance;
+  }
+  .receipt .who:hover { color: var(--gold); }
+  .receipt .artist { color: var(--gold); }
+  .receipt-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 22px; }
+  .receipt-note { font-size: 12px; color: var(--faint); }
+  .figs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+  .fig { border: 1px solid var(--line); border-radius: 13px; background: rgba(18,16,22,0.6); padding: 12px 15px; }
+  .fig .l { font-size: 12px; color: var(--muted); }
+  .fig .v { font-family: var(--mono); font-size: 18px; margin-top: 3px; }
+  .journey { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; border: 1px solid var(--line); border-radius: 13px; background: rgba(18,16,22,0.6); padding: 13px 16px; margin-top: 14px; }
+  .journey .right { margin-left: auto; font-size: 13.5px; color: var(--muted); }
+  .chart { border: 1px solid var(--line); border-radius: 17px; background: rgba(18,16,22,0.6); padding: 20px; }
+  .chart-axis { display: flex; justify-content: space-between; font-size: 12px; color: var(--faint); margin-top: 6px; }
+
+  /* ---------- feed ---------- */
+  .feed { display: grid; grid-template-columns: 1fr 248px; gap: 40px; margin-top: 34px; }
+  .scouts { display: flex; flex-direction: column; gap: 8px; }
+  .scout { display: flex; align-items: center; gap: 11px; border: 1px solid var(--line); border-radius: 13px; background: rgba(18,16,22,0.6); padding: 9px 12px; }
+  .scout:hover { border-color: rgba(255,255,255,0.22); }
+  .scout .n { font-size: 13.5px; }
+  .scout .s { font-size: 11.5px; color: var(--muted); }
+  .aside-note { font-size: 12px; color: var(--faint); margin: 16px 0 0; line-height: 1.6; }
+
+  /* ---------- modal ---------- */
+  .scrim { position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,0.72); backdrop-filter: blur(4px); display: grid; place-items: center; padding: 20px; }
+  .modal { width: 100%; max-width: 372px; border: 1px solid var(--line); border-radius: 18px; background: var(--raised); padding: 24px; }
+  .modal-head { display: flex; align-items: center; gap: 13px; }
+  .modal-head .n { font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -0.015em; }
+  .modal-head .g { font-size: 12.5px; color: var(--muted); }
+  .kv { border: 1px solid var(--line); border-radius: 13px; background: var(--surface); padding: 14px 16px; margin-top: 19px; display: flex; flex-direction: column; gap: 9px; font-size: 13.5px; }
+  .kv > div { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .kv .k { color: var(--muted); }
+  .modal p { font-size: 12.5px; color: var(--muted); line-height: 1.6; margin: 16px 0 0; }
+  .modal-actions { display: flex; gap: 9px; margin-top: 20px; }
+  .modal-actions .btn { flex: 1; text-align: center; padding: 11px 14px; }
+  .btn-quiet { border-color: var(--line); background: none; color: var(--muted); }
+  .btn-quiet:hover { color: var(--ink); }
+
+  .foot { border-top: 1px solid var(--line-soft); margin-top: 84px; padding: 26px 0; text-align: center; font-size: 12px; color: var(--faint); }
+  .backlink { font-size: 13.5px; color: var(--muted); display: inline-block; margin-top: 30px; }
+  .backlink:hover { color: var(--ink); }
+  .empty { border: 1px dashed var(--line); border-radius: 16px; padding: 56px 20px; text-align: center; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; gap: 36px; padding-top: 44px; }
+    .hero h1 { max-width: none; }
+    .detail, .feed { grid-template-columns: 1fr; gap: 28px; }
+    .card-grid, .tiers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .steps, .others, .stats { grid-template-columns: 1fr; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .card-grid, .tiers, .figs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .figs { grid-template-columns: 1fr; }
+    .nav .link { padding: 6px 8px; font-size: 13px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+
+<div id="app"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ===================== data ===================== */
+
+  var BANDS = [
+    { id: 1, name: "Underground",    min: 0,          max: 100000,   accent: "var(--band-1)" },
+    { id: 2, name: "Cult Following", min: 100000,     max: 500000,   accent: "var(--band-2)" },
+    { id: 3, name: "Established",    min: 500000,     max: 2000000,  accent: "var(--band-3)" },
+    { id: 4, name: "Mainstream",     min: 2000000,    max: 10000000, accent: "var(--band-4)" },
+    { id: 5, name: "Superstar",      min: 10000000,   max: null,     accent: "var(--band-5)" }
+  ];
+
+  var TIERS = ["none", "bronze", "silver", "gold", "diamond"];
+  var TIER_LABEL = { none: "Backed", bronze: "Bronze", silver: "Silver", gold: "Gold", diamond: "Diamond" };
+
+  var ARTISTS = [
+    { id: "chappell-roan",     name: "Chappell Roan",    genre: "Pop",              listeners: 42100000 },
+    { id: "pinkpantheress",    name: "PinkPantheress",   genre: "Alt pop",          listeners: 8420000 },
+    { id: "sampha",            name: "Sampha",           genre: "Soul",             listeners: 6300000 },
+    { id: "fontaines-dc",      name: "Fontaines D.C.",   genre: "Post-punk",        listeners: 5240000 },
+    { id: "brockhampton",      name: "BROCKHAMPTON",     genre: "Hip hop",          listeners: 4760000 },
+    { id: "alex-g",            name: "Alex G",           genre: "Indie rock",       listeners: 4180000 },
+    { id: "earl-sweatshirt",   name: "Earl Sweatshirt",  genre: "Hip hop",          listeners: 3900000 },
+    { id: "loyle-carner",      name: "Loyle Carner",     genre: "Hip hop",          listeners: 3450000 },
+    { id: "mk-gee",            name: "MK.gee",           genre: "Alternative",      listeners: 2600000 },
+    { id: "the-dare",          name: "The Dare",         genre: "Dance punk",       listeners: 2100000 },
+    { id: "panda-bear",        name: "Panda Bear",       genre: "Psych pop",        listeners: 1900000 },
+    { id: "wet-leg",           name: "Wet Leg",          genre: "Indie rock",       listeners: 1410000 },
+    { id: "la-lom",            name: "LA LOM",           genre: "Cumbia",           listeners: 1120000 },
+    { id: "joy-orbison",       name: "Joy Orbison",      genre: "Electronic",       listeners: 1050000 },
+    { id: "wednesday",         name: "Wednesday",        genre: "Indie rock",       listeners: 780000 },
+    { id: "sofia-kourtesis",   name: "Sofia Kourtesis",  genre: "House",            listeners: 720000 },
+    { id: "bar-italia",        name: "bar italia",       genre: "Indie",            listeners: 640000 },
+    { id: "jane-remover",      name: "Jane Remover",     genre: "Hyperpop",         listeners: 610000 },
+    { id: "english-teacher",   name: "English Teacher",  genre: "Indie",            listeners: 520000 },
+    { id: "geordie-greep",     name: "Geordie Greep",    genre: "Art rock",         listeners: 480000 },
+    { id: "saya-gray",         name: "Saya Gray",        genre: "Alternative",      listeners: 470000 },
+    { id: "mike",              name: "MIKE",             genre: "Abstract hip hop", listeners: 412000 },
+    { id: "kara-jackson",      name: "Kara Jackson",     genre: "Folk",             listeners: 390000 },
+    { id: "nourished-by-time", name: "Nourished by Time",genre: "Alt R&B",          listeners: 340000 },
+    { id: "cindy-lee",         name: "Cindy Lee",        genre: "Lo-fi pop",        listeners: 285000 },
+    { id: "deki-alem",         name: "Deki Alem",        genre: "Alt hip hop",      listeners: 210000 },
+    { id: "horsegirl",         name: "Horsegirl",        genre: "Indie rock",       listeners: 165000 },
+    { id: "yaya-bey",          name: "Yaya Bey",         genre: "Neo-soul",         listeners: 96000 },
+    { id: "tapir",             name: "Tapir!",           genre: "Indie folk",       listeners: 88000 },
+    { id: "blue-bendy",        name: "Blue Bendy",       genre: "Post-punk",        listeners: 41000 }
+  ];
+
+  var USERS = [
+    { id: "bruce", username: "bruce", name: "Bruce", kind: "person", bio: "Backing more misses than hits. Still early on a few." },
+    { id: "jack", username: "jack", name: "Jack", kind: "person", bio: "Rap, post-punk, and whatever Chap sends me." },
+    { id: "maia", username: "maia", name: "Maia", kind: "person", bio: "Hyperpop apologist." },
+    { id: "pitchfork", username: "pitchfork", name: "Pitchfork", kind: "publication", bio: "Ones to Watch lists, 2023-2025. Auto-backed from published articles." }
+  ];
+
+  var ME = "bruce";
+
+  var BACKS = [
+    { id: "b1", userId: "bruce", artistId: "chappell-roan", backedAt: "2020-03-14", at: 22000 },
+    { id: "b2", userId: "bruce", artistId: "fontaines-dc", backedAt: "2018-09-02", at: 84000 },
+    { id: "b3", userId: "bruce", artistId: "alex-g", backedAt: "2017-11-20", at: 190000 },
+    { id: "b4", userId: "bruce", artistId: "pinkpantheress", backedAt: "2021-02-11", at: 310000 },
+    { id: "b5", userId: "bruce", artistId: "mike", backedAt: "2018-01-22", at: 48000 },
+    { id: "b6", userId: "bruce", artistId: "wet-leg", backedAt: "2021-06-30", at: 62000 },
+    { id: "b7", userId: "bruce", artistId: "cindy-lee", backedAt: "2023-08-01", at: 96000 },
+    { id: "b8", userId: "bruce", artistId: "geordie-greep", backedAt: "2024-10-05", at: 140000 },
+    { id: "b9", userId: "bruce", artistId: "yaya-bey", backedAt: "2022-05-18", at: 71000 },
+
+    { id: "j1", userId: "jack", artistId: "mike", backedAt: "2018-01-04", at: 44000 },
+    { id: "j2", userId: "jack", artistId: "mk-gee", backedAt: "2021-09-19", at: 74000 },
+    { id: "j3", userId: "jack", artistId: "brockhampton", backedAt: "2017-04-12", at: 130000 },
+    { id: "j4", userId: "jack", artistId: "la-lom", backedAt: "2023-03-08", at: 52000 },
+    { id: "j5", userId: "jack", artistId: "sampha", backedAt: "2016-02-02", at: 620000 },
+    { id: "j6", userId: "jack", artistId: "nourished-by-time", backedAt: "2023-05-04", at: 38000 },
+    { id: "j7", userId: "jack", artistId: "blue-bendy", backedAt: "2024-01-15", at: 12000 },
+
+    { id: "m1", userId: "maia", artistId: "jane-remover", backedAt: "2022-07-14", at: 90000 },
+    { id: "m2", userId: "maia", artistId: "the-dare", backedAt: "2023-06-21", at: 180000 },
+    { id: "m3", userId: "maia", artistId: "horsegirl", backedAt: "2021-11-02", at: 22000 },
+    { id: "m4", userId: "maia", artistId: "saya-gray", backedAt: "2022-02-09", at: 60000 },
+
+    { id: "p1", userId: "pitchfork", artistId: "english-teacher", backedAt: "2024-01-09", at: 60000 },
+    { id: "p2", userId: "pitchfork", artistId: "wednesday", backedAt: "2023-01-10", at: 95000 },
+    { id: "p3", userId: "pitchfork", artistId: "kara-jackson", backedAt: "2023-01-10", at: 25000 },
+    { id: "p4", userId: "pitchfork", artistId: "bar-italia", backedAt: "2023-01-10", at: 140000 },
+    { id: "p5", userId: "pitchfork", artistId: "tapir", backedAt: "2024-01-09", at: 30000 }
+  ];
+
+  var ACTIVITY = [
+    { id: "a1", kind: "upgrade", userId: "jack", artistId: "mk-gee", at: "2026-09-08", tier: "gold", cardId: "j2" },
+    { id: "a2", kind: "back", userId: "maia", artistId: "saya-gray", at: "2026-09-07", cardId: "m4" },
+    { id: "a3", kind: "upgrade", userId: "bruce", artistId: "cindy-lee", at: "2026-09-05", tier: "bronze", cardId: "b7" },
+    { id: "a4", kind: "back", userId: "jack", artistId: "blue-bendy", at: "2026-09-03", cardId: "j7" },
+    { id: "a5", kind: "upgrade", userId: "pitchfork", artistId: "english-teacher", at: "2026-08-29", tier: "silver", cardId: "p1" },
+    { id: "a6", kind: "back", userId: "maia", artistId: "the-dare", at: "2026-08-24", cardId: "m2" },
+    { id: "a7", kind: "upgrade", userId: "jack", artistId: "la-lom", at: "2026-08-19", tier: "silver", cardId: "j4" }
+  ];
+
+  var PICK_LIMIT = 3;
+  var STORE_KEY = "trackrecord.demo.backs";
+
+  /* ===================== helpers ===================== */
+
+  function artist(id) { for (var i = 0; i < ARTISTS.length; i++) if (ARTISTS[i].id === id) return ARTISTS[i]; }
+  function user(id) { for (var i = 0; i < USERS.length; i++) if (USERS[i].id === id) return USERS[i]; }
+  function userByName(u) { for (var i = 0; i < USERS.length; i++) if (USERS[i].username === u) return USERS[i]; }
+
+  function bandFor(n) {
+    for (var i = 0; i < BANDS.length; i++) if (BANDS[i].max === null || n < BANDS[i].max) return BANDS[i];
+    return BANDS[4];
+  }
+  function tierFor(gained) { return gained <= 0 ? "none" : TIERS[Math.min(gained, 4)]; }
+
+  function trim(s) { return s.replace(/\.0$/, ""); }
+  function fmtL(n) {
+    if (n >= 1000000) { var m = n / 1000000; return (m >= 10 ? Math.round(m) : trim(m.toFixed(1))) + "m"; }
+    if (n >= 1000) { var k = n / 1000; return (k >= 10 ? Math.round(k) : trim(k.toFixed(1))) + "k"; }
+    return String(n);
+  }
+  function fmtGrowth(from, to) {
+    if (from <= 0) return "-";
+    var mult = to / from;
+    if (mult >= 10) return "×" + Math.round(mult).toLocaleString();
+    var pct = ((to - from) / from) * 100;
+    return (pct < 0 ? "" : "+") + pct.toFixed(0) + "%";
+  }
+  function fmtDate(iso) {
+    return new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  }
+  function fmtMonth(iso) {
+    return new Date(iso + "T00:00:00").toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+
+  function hashOf(s) { var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100000; return h; }
+  function initials(name) {
+    var w = name.replace(/[^A-Za-z0-9 ]/g, "").split(/\s+/).filter(Boolean);
+    if (!w.length) return "??";
+    return (w.length === 1 ? w[0].slice(0, 2) : w[0][0] + w[1][0]).toUpperCase();
+  }
+  function gradientFor(name) {
+    var h = hashOf(name), a = h % 360, b = (a + 48 + (h % 40)) % 360;
+    return "linear-gradient(150deg, hsl(" + a + " 58% 30%), hsl(" + b + " 62% 16%) 70%, hsl(" + a + " 40% 10%))";
+  }
+
+  /* ===================== state ===================== */
+
+  function extra() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || "[]"); } catch (e) { return []; }
+  }
+  function saveExtra(list) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(list)); } catch (e) { /* private mode */ }
+  }
+  function allBacks() { return BACKS.concat(extra()); }
+  function picksLeft() { return Math.max(0, PICK_LIMIT - extra().length); }
+
+  function toCard(b) {
+    var a = artist(b.artistId), u = user(b.userId);
+    if (!a || !u) return null;
+    var was = bandFor(b.at), now = bandFor(a.listeners), gained = now.id - was.id;
+    return {
+      id: b.id, user: u, artist: a, backedAt: b.backedAt,
+      at: b.at, now: a.listeners, was: was, band: now,
+      gained: gained, tier: tierFor(gained)
+    };
+  }
+  function cardsFor(userId) {
+    return allBacks().filter(function (b) { return b.userId === userId; })
+      .map(toCard).filter(Boolean)
+      .sort(function (x, y) { return y.gained - x.gained || new Date(x.backedAt) - new Date(y.backedAt); });
+  }
+  function cardById(id) {
+    var b = allBacks().filter(function (x) { return x.id === id; })[0];
+    return b ? toCard(b) : null;
+  }
+  function backersOf(artistId) {
+    return allBacks().filter(function (b) { return b.artistId === artistId; })
+      .map(toCard).filter(Boolean)
+      .sort(function (x, y) { return new Date(x.backedAt) - new Date(y.backedAt); });
+  }
+  function statsFor(cards) {
+    var upgraded = 0, sum = 0, best = 0;
+    cards.forEach(function (c) {
+      if (c.gained > 0) upgraded++;
+      if (c.at > 0) sum += ((c.now - c.at) / c.at) * 100;
+      if (c.gained > best) best = c.gained;
+    });
+    return { cards: cards.length, upgraded: upgraded, avg: cards.length ? sum / cards.length : 0, best: tierFor(best) };
+  }
+
+  function history(card) {
+    var start = new Date(card.backedAt + "T00:00:00"), end = new Date("2026-09-09T00:00:00");
+    var months = Math.max(2, (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()));
+    var seed = hashOf(card.id), pts = [];
+    for (var i = 0; i <= months; i++) {
+      var t = i / months, eased = Math.pow(t, 1.8);
+      var base = card.at + (card.now - card.at) * eased;
+      var flat = i === 0 || i === months;
+      var noise = Math.sin((i + seed) * 1.7) * 0.035 + Math.sin((i + seed) * 0.6) * 0.02;
+      var v = i === 0 ? card.at : i === months ? card.now : Math.max(1000, Math.round(base * (1 + (flat ? 0 : noise))));
+      pts.push(v);
+    }
+    return pts;
+  }
+
+  /* ===================== view pieces ===================== */
+
+  function avatar(name, size, square) {
+    return '<div class="avatar' + (square ? " sq" : "") + '" style="width:' + size + 'px;height:' + size +
+      "px;background:" + gradientFor(name) + ";font-size:" + Math.round(size * 0.36) + 'px">' + initials(name) + "</div>";
+  }
+
+  function bandPill(band, past) {
+    if (past) return '<span class="band past"><span class="dot"></span>' + band.name + "</span>";
+    return '<span class="band" style="background:color-mix(in srgb, ' + band.accent + ' 13%, transparent);color:' +
+      band.accent + ";box-shadow:inset 0 0 0 1px color-mix(in srgb, " + band.accent +
+      ' 22%, transparent)"><span class="dot"></span>' + band.name + "</span>";
+  }
+
+  function cardHtml(card, showOwner) {
+    return '<a class="card tier tier-' + card.tier + '" href="#/card/' + card.id + '">' +
+      '<div class="card-frame"><div class="card-inner">' +
+        '<div class="card-art sheen" style="background:' + gradientFor(card.artist.name) + '">' +
+          '<span class="card-initials">' + initials(card.artist.name) + "</span>" +
+          '<span class="tier-chip' + (card.tier === "none" ? " plain" : "") + '">' + TIER_LABEL[card.tier] + "</span>" +
+          (card.gained > 0 ? '<span class="band-gain">+' + card.gained + " band" + (card.gained > 1 ? "s" : "") + "</span>" : "") +
+        "</div>" +
+        '<div class="card-body">' +
+          "<div><div class=\"card-name\">" + esc(card.artist.name) + "</div>" +
+          '<div class="card-sub">' + (showOwner ? esc(card.user.name) + " &middot; " : "") + "Backed " + fmtDate(card.backedAt) + "</div></div>" +
+          '<div class="card-row"><span class="mono">' + fmtL(card.at) + ' <span class="arrow">&rarr;</span> ' + fmtL(card.now) +
+          '</span><span class="growth">' + fmtGrowth(card.at, card.now) + "</span></div>" +
+          '<div class="card-bands">' + bandPill(card.was, true) + '<span class="arrow">&rarr;</span>' + bandPill(card.band) + "</div>" +
+        "</div>" +
+      "</div></div></a>";
+  }
+
+  function nav(route) {
+    var me = user(ME);
+    function link(href, label, on) {
+      return '<a class="link' + (on ? " on" : "") + '" href="' + href + '">' + label + "</a>";
+    }
+    return '<header class="nav"><div class="wrap nav-in">' +
+      '<a class="brand" href="#/"><span class="brand-mark">T</span><span class="brand-name">Track Record</span></a>' +
+      link("#/feed", "Feed", route === "feed") +
+      link("#/back", "Back an artist", route === "back") +
+      '<a class="me' + (route === "profile-me" ? " on" : "") + '" href="#/u/' + me.username + '" title="My Track Record">' +
+      avatar(me.name, 30) + "</a>" +
+      "</div></header>";
+  }
+
+  function foot() {
+    return '<div class="foot">Track Record &mdash; early prototype. Every artist and number here is placeholder data.</div>';
+  }
+
+  /* ===================== screens ===================== */
+
+  function homeView() {
+    var hero = cardById("b1");
+    var showcase = cardsFor("bruce").slice(0, 4);
+
+    var steps = [
+      ["Pick an artist", "Search any artist. Their monthly listeners are snapshotted the second you back them."],
+      ["The card is permanent", "It sits on your profile with the date and the number locked in. You can't take it back."],
+      ["Watch it upgrade", "Every band they climb upgrades your card &mdash; Bronze, Silver, Gold, Diamond."]
+    ].map(function (s, i) {
+      return '<div class="step"><div class="step-n">0' + (i + 1) + "</div><h3>" + s[0] + "</h3><p>" + s[1] + "</p></div>";
+    }).join("");
+
+    var bandRows = BANDS.map(function (b) {
+      var range = b.max === null ? fmtL(b.min) + "+" : (b.min === 0 ? "0" : fmtL(b.min)) + " – " + fmtL(b.max);
+      return '<div class="band-row"><span class="n">' + b.id + "</span>" + bandPill(b) + '<span class="range">' + range + "</span></div>";
+    }).join("");
+
+    var tierCards = [
+      ["bronze", "+1 band", "They moved up one tier since you backed them."],
+      ["silver", "+2 bands", "A real climb. You were early."],
+      ["gold", "+3 bands", "Underground to mainstream on your watch."],
+      ["diamond", "+4 bands", "Nobody to superstar. The rarest card there is."]
+    ].map(function (t) {
+      return '<div class="tier tier-' + t[0] + '"><div class="card-frame"><div class="tier-card sheen">' +
+        '<span class="tier-chip flat">' + TIER_LABEL[t[0]] + "</span><h3>" + t[1] + "</h3><p>" + t[2] + "</p>" +
+        "</div></div></div>";
+    }).join("");
+
+    return '<div class="wrap">' +
+      '<section class="hero"><div>' +
+        '<div class="tag"><span class="dot"></span>Early prototype</div>' +
+        "<h1>Back artists <span class=\"accent\">before they blow up.</span></h1>" +
+        '<p class="lead">When you back an artist they join your profile forever &mdash; with the date you backed them and exactly how many monthly listeners they had at that moment. As they grow, your card upgrades.</p>' +
+        '<p class="lead">No unfollowing. No deleting. A permanent record of your taste.</p>' +
+        '<div class="hero-actions"><a class="btn btn-gold" href="#/back">Back an artist</a>' +
+        '<a class="btn btn-ghost" href="#/u/bruce">See a Track Record</a></div>' +
+      "</div>" +
+      '<div><div class="hero-card">' + cardHtml(hero) + "</div>" +
+      '<p class="hero-cap">Backed at ' + fmtL(hero.at) + " monthly listeners. Now " + fmtL(hero.now) + ".</p></div>" +
+      "</section>" +
+
+      '<section class="section"><p class="eyebrow">How it works</p><div class="steps">' + steps + "</div></section>" +
+
+      '<section class="section"><p class="eyebrow">The five bands</p>' +
+      '<p class="lead">Artists sit in a band based on their monthly listeners. The lower the band when you back them, the more there is to gain.</p>' +
+      '<div class="bands">' + bandRows + "</div></section>" +
+
+      '<section class="section"><p class="eyebrow">Card upgrades</p><div class="tiers">' + tierCards + "</div></section>" +
+
+      '<section class="section"><div class="section-head"><p class="eyebrow">A track record in progress</p>' +
+      '<a href="#/u/bruce" style="color:var(--gold);font-size:13.5px">View full profile &rarr;</a></div>' +
+      '<div class="card-grid">' + showcase.map(function (c) { return cardHtml(c); }).join("") + "</div></section>" +
+      "</div>" + foot();
+  }
+
+  function profileView(username, filter) {
+    var u = userByName(username);
+    if (!u) return '<div class="wrap"><div class="empty" style="margin-top:80px">No such profile. <a href="#/" style="color:var(--gold)">Back home</a></div></div>';
+
+    var cards = cardsFor(u.id), s = statsFor(cards);
+    var shown = filter === "all" ? cards : cards.filter(function (c) { return c.tier === filter; });
+    var earliest = cards.reduce(function (min, c) { return !min || c.backedAt < min ? c.backedAt : min; }, null);
+
+    var filters = [["all", "All"], ["diamond", "Diamond"], ["gold", "Gold"], ["silver", "Silver"], ["bronze", "Bronze"], ["none", "Unmoved"]]
+      .map(function (f) {
+        return '<button data-filter="' + f[0] + '" class="' + (filter === f[0] ? "on" : "") + '">' + f[1] + "</button>";
+      }).join("");
+
+    var others = USERS.filter(function (o) { return o.id !== u.id; }).map(function (o) {
+      var os = statsFor(cardsFor(o.id));
+      return '<a class="other" href="#/u/' + o.username + '">' + avatar(o.name, 38) +
+        '<div><div class="n">' + o.name + '</div><div class="s">' + os.cards + " cards &middot; " + os.upgraded + " upgraded</div></div></a>";
+    }).join("");
+
+    return '<div class="wrap">' +
+      '<div class="profile-head">' + avatar(u.name, 78, true) +
+        '<div style="flex:1;min-width:240px"><h1>' + esc(u.name) + "</h1>" +
+        (u.kind === "publication" ? '<span class="pill-tag" style="margin-top:8px;display:inline-block">Publication</span>' : "") +
+        '<div class="handle">@' + u.username + '</div><p class="lead" style="margin:12px 0 0;font-size:14px">' + esc(u.bio) + "</p>" +
+        (earliest ? '<p style="font-size:12px;color:var(--faint);margin:8px 0 0">Backing artists since ' + fmtDate(earliest) + "</p>" : "") +
+        "</div></div>" +
+
+      '<div class="stats">' +
+        '<div class="stat"><div class="v">' + s.cards + '</div><div class="l">Cards</div></div>' +
+        '<div class="stat"><div class="v">' + s.upgraded + '</div><div class="l">Upgraded</div></div>' +
+        '<div class="stat"><div class="v">' + (s.avg >= 0 ? "+" : "") + Math.round(s.avg).toLocaleString() + '%</div><div class="l">Avg. growth since backing</div></div>' +
+        '<div class="stat"><div class="v">' + TIER_LABEL[s.best] + '</div><div class="l">Best card</div></div>' +
+      "</div>" +
+
+      '<section class="section" style="border:0;padding-bottom:0"><div class="section-head">' +
+      '<p class="eyebrow">Track Record</p><div class="filters">' + filters + "</div></div>" +
+      (shown.length
+        ? '<div class="card-grid">' + shown.map(function (c) { return cardHtml(c); }).join("") + "</div>"
+        : '<div class="empty">Nothing in this tier yet.</div>') +
+      "</section>" +
+
+      '<section class="section" style="margin-top:56px"><p class="eyebrow">Other track records</p>' +
+      '<div class="others">' + others + "</div></section>" +
+      "</div>" + foot();
+  }
+
+  function cardView(id) {
+    var c = cardById(id);
+    if (!c) return '<div class="wrap"><div class="empty" style="margin-top:80px">Card not found. <a href="#/" style="color:var(--gold)">Back home</a></div></div>';
+
+    var pts = history(c), backers = backersOf(c.artist.id);
+    var rank = backers.map(function (b) { return b.id; }).indexOf(c.id) + 1;
+
+    var w = 1200, h = 215, padT = 16, padB = 16, padL = 8, padR = 10;
+    var min = Math.min.apply(null, pts), max = Math.max.apply(null, pts), span = (max - min) || 1;
+    var X = function (i) { return padL + (i / (pts.length - 1)) * (w - padL - padR); };
+    var Y = function (v) { return padT + (1 - (v - min) / span) * (h - padT - padB); };
+    var line = pts.map(function (v, i) { return (i ? "L" : "M") + X(i).toFixed(1) + " " + Y(v).toFixed(1); }).join(" ");
+    var area = line + " L " + X(pts.length - 1).toFixed(1) + " " + (h - padB) + " L " + padL + " " + (h - padB) + " Z";
+
+    var chart = '<svg viewBox="0 0 ' + w + " " + h + '" width="100%" role="img" aria-label="Monthly listeners since backing">' +
+      '<defs><linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="' + c.band.accent + '" stop-opacity="0.3"/>' +
+      '<stop offset="100%" stop-color="' + c.band.accent + '" stop-opacity="0"/></linearGradient></defs>' +
+      '<path d="' + area + '" fill="url(#fill)"/>' +
+      '<path d="' + line + '" fill="none" stroke="' + c.band.accent + '" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>' +
+      '<circle cx="' + X(0).toFixed(1) + '" cy="' + Y(pts[0]).toFixed(1) + '" r="4" fill="#615c70"/>' +
+      '<circle cx="' + X(pts.length - 1).toFixed(1) + '" cy="' + Y(pts[pts.length - 1]).toFixed(1) + '" r="5" fill="' + c.band.accent + '"/>' +
+      "</svg>";
+
+    var rows = backers.map(function (b, i) {
+      return '<a class="row' + (b.id === c.id ? " mine" : "") + '" href="#/card/' + b.id + '">' +
+        '<span class="idx">' + (i + 1) + "</span>" + avatar(b.user.name, 30) +
+        '<div class="grow"><div class="t">' + esc(b.user.name) + '</div><div class="s">' + fmtDate(b.backedAt) + "</div></div>" +
+        '<span class="mono" style="font-size:12.5px;color:var(--muted)">' + fmtL(b.at) + "</span></a>";
+    }).join("");
+
+    return '<div class="wrap">' +
+      '<a class="backlink" href="#/u/' + c.user.username + '">&larr; ' + esc(c.user.name) + "'s Track Record</a>" +
+      '<div class="detail"><div>' + cardHtml(c) + "</div><div>" +
+        '<div class="receipt"><p class="eyebrow" style="margin:0">Receipt</p>' +
+          "<p class=\"receipt-line\"><a class=\"who\" href=\"#/u/" + c.user.username + '">' + esc(c.user.name) + "</a> backed " +
+          '<span class="artist">' + esc(c.artist.name) + "</span> in " + fmtMonth(c.backedAt) +
+          ' at <span class="mono">' + c.at.toLocaleString() + "</span> monthly listeners.</p>" +
+          '<div class="receipt-actions"><button class="btn btn-gold" id="share">Share this card</button>' +
+          '<span class="receipt-note">Anyone with the link sees the card and the date &mdash; proof, not a screenshot.</span></div>' +
+        "</div>" +
+        '<div class="figs">' +
+          '<div class="fig"><div class="l">At backing</div><div class="v">' + fmtL(c.at) + "</div></div>" +
+          '<div class="fig"><div class="l">Today</div><div class="v">' + fmtL(c.now) + "</div></div>" +
+          '<div class="fig"><div class="l">Growth</div><div class="v" style="color:var(--up)">' + fmtGrowth(c.at, c.now) + "</div></div>" +
+        "</div>" +
+        '<div class="journey">' + bandPill(c.was, true) + '<span class="arrow">&rarr;</span>' + bandPill(c.band) +
+        '<span class="right">' + (c.gained > 0 ? TIER_LABEL[c.tier] + " card &middot; +" + c.gained + " band" + (c.gained > 1 ? "s" : "") : "No band change yet") + "</span></div>" +
+      "</div></div>" +
+
+      '<section class="section"><p class="eyebrow">Monthly listeners since backing</p>' +
+      '<div class="chart">' + chart + '<div class="chart-axis"><span>' + fmtDate(c.backedAt) + "</span><span>Today</span></div></div></section>" +
+
+      '<section class="section"><p class="eyebrow">Who else backed ' + esc(c.artist.name) + "</p>" +
+      '<div class="rows">' + rows + "</div>" +
+      (backers.length > 1 ? '<p style="font-size:12px;color:var(--faint);margin-top:12px">' + esc(c.user.name) + " was " +
+        (rank === 1 ? "the first" : "#" + rank) + " of " + backers.length + " to back " + esc(c.artist.name) + ".</p>" : "") +
+      "</section></div>" + foot();
+  }
+
+  function backView(state) {
+    var mine = {};
+    allBacks().forEach(function (b) { if (b.userId === ME) mine[b.artistId] = true; });
+
+    var q = (state.q || "").trim().toLowerCase();
+    var list = q
+      ? ARTISTS.filter(function (a) { return a.name.toLowerCase().indexOf(q) > -1 || a.genre.toLowerCase().indexOf(q) > -1; })
+      : ARTISTS.slice().sort(function (a, b) { return a.listeners - b.listeners; });
+    list = list.slice(0, 14);
+
+    var left = picksLeft();
+    var pips = "";
+    for (var i = 0; i < PICK_LIMIT; i++) pips += '<span class="pip' + (i < left ? " on" : "") + '"></span>';
+
+    var rows = list.map(function (a) {
+      var backed = !!mine[a.id];
+      return '<div class="row">' + avatar(a.name, 38, true) +
+        '<div class="grow"><div class="t">' + esc(a.name) + '</div><div class="s">' + a.genre +
+        ' &middot; <span class="mono">' + fmtL(a.listeners) + "</span> listeners</div></div>" +
+        bandPill(bandFor(a.listeners)) +
+        (backed
+          ? '<button class="back-btn done" disabled>Backed</button>'
+          : '<button class="back-btn" data-back="' + a.id + '"' + (left === 0 ? " disabled" : "") + ">Back</button>") +
+        "</div>";
+    }).join("");
+
+    var flash = "";
+    if (state.flash) {
+      var fa = artist(state.flash);
+      flash = '<div class="flash"><div><strong>' + esc(fa.name) + "</strong> is on your Track Record at " +
+        fmtL(fa.listeners) + ' monthly listeners.</div><a class="btn btn-gold" style="padding:7px 13px;font-size:12.5px" href="#/card/new-' + fa.id + '">See the card</a></div>';
+    }
+
+    return '<div class="wrap" style="max-width:760px">' +
+      '<div style="padding-top:46px"><h1 style="font-size:32px">Back an artist</h1>' +
+      '<p class="lead" style="margin-top:10px">Choose carefully. Once you back someone, the card is on your profile permanently.</p></div>' +
+      '<div class="picks"><span>Picks left this week</span><span class="pips">' + pips +
+      '<span class="count">' + left + "/" + PICK_LIMIT + "</span></span></div>" +
+      '<input class="search" id="q" placeholder="Search artists&hellip;" value="' + esc(state.q || "") + '">' +
+      flash +
+      '<section class="section" style="border:0;padding:34px 0 0"><p class="eyebrow">' +
+      (q ? "Results" : "Smallest artists first") + "</p>" +
+      (list.length ? '<div class="rows">' + rows + "</div>" : '<div class="empty">No artists match &ldquo;' + esc(state.q) + "&rdquo;.</div>") +
+      '<p style="font-size:12px;color:var(--faint);margin-top:12px">Prototype note: this list is placeholder data. In the real build it&rsquo;s Spotify search, with monthly listeners from Songstats.</p>' +
+      "</section></div>" + foot();
+  }
+
+  function feedView() {
+    var items = extra().map(function (b) {
+      var c = toCard(b);
+      return { kind: "back", userId: c.user.id, artistId: c.artist.id, at: c.backedAt, cardId: c.id };
+    }).concat(ACTIVITY);
+
+    var rows = items.map(function (it) {
+      var u = user(it.userId), a = artist(it.artistId);
+      var what = it.kind === "back"
+        ? "backed <strong style=\"font-weight:600\">" + esc(a.name) + "</strong>"
+        : "&rsquo;s <strong style=\"font-weight:600\">" + esc(a.name) + "</strong> card upgraded";
+      return '<a class="row" href="#/card/' + it.cardId + '">' + avatar(u.name, 34) +
+        '<div class="grow"><div class="t"><strong style="font-weight:600">' + (u.id === ME ? "You" : esc(u.name)) + "</strong> " + what + "</div>" +
+        '<div class="s">' + fmtDate(it.at) + " &middot; " + fmtL(a.listeners) + " listeners now</div></div>" +
+        (it.tier ? '<span class="tier tier-' + it.tier + '"><span class="tier-chip flat">' + TIER_LABEL[it.tier] + "</span></span>" : "") +
+        "</a>";
+    }).join("");
+
+    var scouts = USERS.map(function (u) { return { u: u, s: statsFor(cardsFor(u.id)) }; })
+      .sort(function (a, b) { return b.s.upgraded - a.s.upgraded || b.s.avg - a.s.avg; })
+      .map(function (e, i) {
+        return '<a class="scout" href="#/u/' + e.u.username + '"><span class="idx" style="width:14px">' + (i + 1) + "</span>" +
+          avatar(e.u.name, 28) + '<div><div class="n">' + e.u.name + '</div><div class="s">' + e.s.upgraded + " upgraded</div></div></a>";
+      }).join("");
+
+    return '<div class="wrap" style="max-width:940px">' +
+      '<div style="padding-top:46px"><h1 style="font-size:32px">Feed</h1>' +
+      '<p class="lead" style="margin-top:10px">What the people you follow are backing, and whose cards moved.</p></div>' +
+      '<div class="feed"><div class="rows">' + rows + "</div>" +
+      '<aside><p class="eyebrow">Best scouts</p><div class="scouts">' + scouts + "</div>" +
+      '<p class="aside-note">Publications get seeded profiles from their &ldquo;ones to watch&rdquo; lists, so the site isn&rsquo;t empty on day one &mdash; and you can see which ones actually call it right.</p>' +
+      '<a href="#/u/pitchfork" style="color:var(--gold);font-size:12.5px">See Pitchfork&rsquo;s record &rarr;</a></aside>' +
+      "</div></div>" + foot();
+  }
+
+  function modalHtml(a) {
+    return '<div class="scrim" id="scrim"><div class="modal">' +
+      '<div class="modal-head">' + avatar(a.name, 46, true) +
+      '<div><div class="n">' + esc(a.name) + '</div><div class="g">' + a.genre + "</div></div></div>" +
+      '<div class="kv">' +
+        '<div><span class="k">Monthly listeners</span><span class="mono">' + a.listeners.toLocaleString() + "</span></div>" +
+        '<div><span class="k">Band</span>' + bandPill(bandFor(a.listeners)) + "</div>" +
+        '<div><span class="k">Dated</span><span class="mono">today</span></div>' +
+      "</div>" +
+      "<p>This is permanent. The number above is locked into your profile and can&rsquo;t be removed or edited later.</p>" +
+      '<div class="modal-actions"><button class="btn btn-quiet" id="cancel">Cancel</button>' +
+      '<button class="btn btn-gold" id="confirm" data-artist="' + a.id + '">Back ' + esc(a.name) + "</button></div>" +
+      "</div></div>";
+  }
+
+  /* ===================== router ===================== */
+
+  var app = document.getElementById("app");
+  var state = { filter: "all", q: "", flash: null, pending: null };
+
+  function parse() {
+    var h = (location.hash || "#/").replace(/^#\/?/, "");
+    var parts = h.split("/").filter(Boolean);
+    if (!parts.length) return { name: "home" };
+    if (parts[0] === "u") return { name: "profile", username: parts[1] || "bruce" };
+    if (parts[0] === "card") return { name: "card", id: parts[1] };
+    if (parts[0] === "back") return { name: "back" };
+    if (parts[0] === "feed") return { name: "feed" };
+    return { name: "home" };
+  }
+
+  function render(keepScroll) {
+    var r = parse();
+    var navKey = r.name === "profile" && r.username === user(ME).username ? "profile-me" : r.name;
+    var body;
+
+    if (r.name === "profile") body = profileView(r.username, state.filter);
+    else if (r.name === "card") body = cardView(r.id);
+    else if (r.name === "back") body = backView(state);
+    else if (r.name === "feed") body = feedView();
+    else body = homeView();
+
+    app.innerHTML = nav(navKey) + body + (state.pending ? modalHtml(artist(state.pending)) : "");
+    if (!keepScroll) window.scrollTo(0, 0);
+
+    var q = document.getElementById("q");
+    if (q) {
+      q.focus();
+      q.setSelectionRange(q.value.length, q.value.length);
+    }
+  }
+
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-back]");
+    if (t) { state.pending = t.getAttribute("data-back"); state.flash = null; render(true); return; }
+
+    if (e.target.id === "cancel" || e.target.id === "scrim") { state.pending = null; render(true); return; }
+
+    var conf = e.target.closest("#confirm");
+    if (conf) {
+      var id = conf.getAttribute("data-artist"), a = artist(id), list = extra();
+      if (!list.some(function (b) { return b.artistId === id; })) {
+        list.push({
+          id: "new-" + id, userId: ME, artistId: id,
+          backedAt: new Date().toISOString().slice(0, 10), at: a.listeners
+        });
+        saveExtra(list);
+      }
+      state.pending = null; state.flash = id;
+      render(true);
+      return;
+    }
+
+    var f = e.target.closest("[data-filter]");
+    if (f) { state.filter = f.getAttribute("data-filter"); render(true); return; }
+
+    if (e.target.id === "share") {
+      var btn = e.target;
+      var url = location.href;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(function () {
+          btn.textContent = "Link copied";
+          setTimeout(function () { btn.textContent = "Share this card"; }, 2000);
+        }, function () { btn.textContent = "Copy the URL"; });
+      } else {
+        btn.textContent = "Copy the URL";
+      }
+    }
+  });
+
+  document.addEventListener("input", function (e) {
+    if (e.target.id === "q") { state.q = e.target.value; render(true); }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && state.pending) { state.pending = null; render(true); }
+  });
+
+  window.addEventListener("hashchange", function () {
+    state.filter = "all"; state.q = ""; state.flash = null; state.pending = null;
+    render();
+  });
+
+  render();
+})();
+</script>
