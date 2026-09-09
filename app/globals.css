@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #f4f4f6;
+  --color-muted: #8b8b98;
+  --color-faint: #5c5c68;
+  --color-base: #08080a;
+  --color-surface: #101014;
+  --color-raised: #17171d;
+  --color-line: #24242c;
+  --color-accent: #e8b64c;
+
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  background: var(--color-base);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  background-image:
+    radial-gradient(60rem 40rem at 12% -10%, rgba(232, 182, 76, 0.07), transparent 60%),
+    radial-gradient(50rem 36rem at 92% 0%, rgba(167, 139, 250, 0.06), transparent 60%);
+  background-attachment: fixed;
+}
+
+::selection {
+  background: rgba(232, 182, 76, 0.28);
+}
+
+/* ---------- Trading-card tier treatments ---------- */
+
+.tier {
+  --ring: linear-gradient(160deg, #2c2c36, #1c1c24 60%, #2c2c36);
+  --glow: rgba(0, 0, 0, 0);
+  --chip: #6b6b78;
+  --chip-ink: #0b0b0e;
+}
+
+.tier-bronze {
+  --ring: linear-gradient(160deg, #f3c08a, #a25a20 42%, #e69a58 78%, #7d431a);
+  --glow: rgba(205, 127, 50, 0.22);
+  --chip: #d08a45;
+  --chip-ink: #21120a;
+}
+
+.tier-silver {
+  --ring: linear-gradient(160deg, #ffffff, #98a0aa 42%, #e6edf4 74%, #7d848d);
+  --glow: rgba(206, 216, 226, 0.2);
+  --chip: #cfd6de;
+  --chip-ink: #14161a;
+}
+
+.tier-gold {
+  --ring: linear-gradient(160deg, #fff0b0, #c8901a 40%, #ffd76b 72%, #9a6b0f);
+  --glow: rgba(232, 182, 76, 0.3);
+  --chip: #f0c351;
+  --chip-ink: #241a04;
+}
+
+.tier-diamond {
+  --ring: linear-gradient(160deg, #eafcff, #7fd8ff 26%, #c9a7ff 52%, #9ef7e0 76%, #7fd8ff);
+  --glow: rgba(150, 220, 255, 0.34);
+  --chip: #bfefff;
+  --chip-ink: #06222b;
+}
+
+.card-frame {
+  background: var(--ring);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 18px 40px -24px var(--glow),
+    0 0 34px -18px var(--glow);
+  transition: transform 180ms ease, box-shadow 220ms ease;
+}
+
+.card-frame:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.5), 0 26px 48px -22px var(--glow),
+    0 0 52px -16px var(--glow);
+}
+
+.tier-chip {
+  background: var(--chip);
+  color: var(--chip-ink);
+}
+
+.tier-diamond .card-sheen::after,
+.tier-gold .card-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 32%, rgba(255, 255, 255, 0.11) 46%, transparent 60%);
+  pointer-events: none;
+}
+
+.grain {
+  position: relative;
+}
+
+.grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.35;
+  mix-blend-mode: overlay;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.16) 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+  pointer-events: none;
+}
