@@ -63,8 +63,8 @@ export const ARTISTS: Artist[] = [
 ];
 
 export const USERS: User[] = [
-  { id: "bruce", username: "bruce", name: "Bruce", kind: "person", bio: "Backing more misses than hits. Still early on a few." },
-  { id: "jack", username: "jack", name: "Jack", kind: "person", bio: "Rap, post-punk, and whatever Chap sends me." },
+  { id: "bruce", username: "bruce", name: "Bruce", kind: "person", bio: "Rap, post-punk, and whatever Chap sends me." },
+  { id: "jack", username: "jack", name: "Jack", kind: "person", bio: "Found BROCKHAMPTON in 2017. Still bringing it up." },
   { id: "maia", username: "maia", name: "Maia", kind: "person", bio: "Hyperpop apologist." },
   { id: "pitchfork", username: "pitchfork", name: "Pitchfork", kind: "publication", bio: "Ones to Watch lists, 2023–2025. Auto-backed from published articles." },
 ];
