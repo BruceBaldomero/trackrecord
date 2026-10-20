@@ -6,6 +6,28 @@ that moment, and upgrades as they grow.
 This repo is currently a **clickable prototype** — the full UI running on placeholder data, so the
 idea can be looked at and argued with before any money is spent on APIs or hosting.
 
+## Artist data
+
+Artist search and images come from **MusicBrainz** (canonical identity, free, no key) and
+the **iTunes Search API** (artwork, free, no key). Spotify is not an option — see
+[BLOCKERS.md](BLOCKERS.md).
+
+Note that iTunes supplies *album artwork*, not artist photographs.
+
+To see it working, start the dev server and hit the route:
+
+```bash
+npm run dev
+curl "http://localhost:3000/api/artists/search?q=wet%20leg"
+```
+
+This needs real outbound internet, so it works on a normal machine but not inside a
+restricted CI/cloud environment. Set `MUSICBRAINZ_CONTACT` to an email or URL —
+MusicBrainz requires a contactable User-Agent and will rate-limit anonymous clients.
+
+Monthly listener counts still have no live source: Songstats is the intended provider but
+isn't wired up yet, so listener figures remain placeholder data.
+
 ## Run it
 
 ```bash
