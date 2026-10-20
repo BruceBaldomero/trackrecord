@@ -66,8 +66,29 @@ export function growthPct(from: number, to: number): number {
   return ((to - from) / from) * 100;
 }
 
+/**
+ * Backing dates are calendar days, not instants. `new Date("2020-03-14")` parses as UTC
+ * midnight, which renders as the 13th anywhere west of UTC — and a card's date is the
+ * one thing the product promises is exact.
+ */
+export function parseDay(iso: string): Date {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
+/** A Date rendered as YYYY-MM-DD using its local components, never UTC. */
+export function toISODay(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+/** Today as YYYY-MM-DD in the viewer's own timezone. */
+export function todayISO(): string {
+  return toISODay(new Date());
+}
+
 export function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
+  return parseDay(iso).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -75,7 +96,7 @@ export function formatDate(iso: string): string {
 }
 
 export function formatMonthYear(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-GB", {
+  return parseDay(iso).toLocaleDateString("en-GB", {
     month: "long",
     year: "numeric",
   });

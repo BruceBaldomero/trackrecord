@@ -15,6 +15,16 @@ npm run dev
 
 Then open http://localhost:3000.
 
+```bash
+npm run lint    # eslint
+npm test        # vitest — band thresholds, tier logic, date handling
+npm run build   # production build
+```
+
+All three should pass before pushing. The test suite runs under `TZ=America/New_York`
+deliberately: backing dates are calendar days, and a UTC-parsing bug would otherwise only
+show up for users west of the UK.
+
 `demo/trackrecord.html` is a standalone single-file copy of the same prototype — open it in a
 browser directly, no install needed. It's for showing people; the Next.js app is the real codebase.
 

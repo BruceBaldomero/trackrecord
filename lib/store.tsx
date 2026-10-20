@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useCallback, useContext, useSyncExternalStore } from "react";
+import { todayISO } from "./bands";
 import { Back, CURRENT_USER_ID } from "./data";
 
 const STORAGE_KEY = "trackrecord.demo.backs";
@@ -57,7 +58,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         id: `new-${artistId}`,
         userId: CURRENT_USER_ID,
         artistId,
-        backedAt: new Date().toISOString().slice(0, 10),
+        backedAt: todayISO(),
         listenersAtBacking: listenerCount,
       },
     ]);

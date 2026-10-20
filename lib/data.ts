@@ -3,7 +3,9 @@ import {
   Tier,
   bandFor,
   growthPct,
+  parseDay,
   tierFor,
+  toISODay,
 } from "./bands";
 
 export type Artist = {
@@ -211,8 +213,8 @@ export const ACTIVITY: ActivityItem[] = [
 
 /** Deterministic monthly listener series between backing and now, for card charts. */
 export function listenerHistory(card: Card): { date: string; value: number }[] {
-  const start = new Date(card.backedAt);
-  const end = new Date("2026-09-09");
+  const start = parseDay(card.backedAt);
+  const end = new Date();
   const months = Math.max(
     2,
     (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth())
@@ -231,7 +233,7 @@ export function listenerHistory(card: Card): { date: string; value: number }[] {
     const value = Math.max(1000, Math.round(base * (1 + (flat ? 0 : noise))));
     const d = new Date(start.getFullYear(), start.getMonth() + i, 1);
     points.push({
-      date: d.toISOString().slice(0, 10),
+      date: toISODay(d),
       value: i === months ? card.listenersNow : i === 0 ? card.listenersAtBacking : value,
     });
   }

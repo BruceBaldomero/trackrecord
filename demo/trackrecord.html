@@ -528,7 +528,7 @@
   }
 
   function history(card) {
-    var start = new Date(card.backedAt + "T00:00:00"), end = new Date("2026-09-09T00:00:00");
+    var start = new Date(card.backedAt + "T00:00:00"), end = new Date();
     var months = Math.max(2, (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth()));
     var seed = hashOf(card.id), pts = [];
     for (var i = 0; i <= months; i++) {
