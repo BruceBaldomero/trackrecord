@@ -13,7 +13,7 @@ Built by Bruce (developer) with Jack (product). Pre-launch, no users yet.
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · Vitest.
 Planned: Supabase (Postgres + auth), Vercel hosting, Vercel Cron for the weekly refresh.
 
-Next.js is not optional here: the Songstats key must stay server-side and the weekly
+Next.js is not optional here: the data-provider key must stay server-side and the weekly
 refresh needs a scheduled server job. Don't propose a static/SPA host.
 
 ## Before pushing
@@ -79,9 +79,25 @@ The project has to stay close to free while it's unvalidated.
 - **The weekly refresh must page past 1000 rows.** Supabase returns at most 1000 per query;
   a refresh job that doesn't paginate will silently update only the first 1000 artists and
   the rest just quietly stop moving.
-- Stay on free tiers (Supabase, Vercel) unless we agree otherwise. Spotify's API is free and
-  handles artist search; it does **not** expose monthly listeners, which is why Songstats
-  exists in the stack.
+- Stay on free tiers (Supabase, Vercel) unless we agree otherwise.
+
+## Artist data source — UNRESOLVED, do not assume Spotify
+
+**Spotify's Web API is not available to this project.** Since Feb 2026 development mode is
+capped at **5 users** and requires the app owner to hold Spotify Premium; extended quota
+mode requires a registered organisation with **250k+ monthly active users**. A pre-launch
+consumer app cannot get from one to the other. Earlier versions of this file and Jack's
+proposal doc both assumed free Spotify search — that assumption is wrong.
+
+Artist search, artist images and monthly listeners therefore need a provider that is
+actually open to us. Preferred: Songstats for all three, if their API does search and
+serves images (open question with Evan at Songstats). Fallbacks: MusicBrainz (free,
+canonical IDs, ~1 req/sec, needs a descriptive User-Agent, no images), iTunes Search (no
+auth), Discogs (token, weak images), with images from Wikidata or Discogs subject to
+licensing.
+
+Until this is settled, do not build a Spotify client. Model artists with a generic
+`external_id` + `source` so the provider can change without a migration.
 
 ## Testing
 
