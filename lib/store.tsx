@@ -50,6 +50,8 @@ export type BackedArtistInput = {
   name: string;
   genre: string | null;
   imageUrl: string | null;
+  /** Null only when no listener figure could be obtained for this artist. */
+  listenersAtBacking: number | null;
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -67,9 +69,7 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
         userId: CURRENT_USER_ID,
         artistId: artist.externalId,
         backedAt: todayISO(),
-        // No listener source is wired up yet, so the card records that it doesn't know
-        // rather than inventing a number onto a permanent record.
-        listenersAtBacking: null,
+        listenersAtBacking: artist.listenersAtBacking,
         artist: {
           source: artist.source,
           name: artist.name,

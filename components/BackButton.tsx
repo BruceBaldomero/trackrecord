@@ -44,6 +44,21 @@ export function BackButton({ artist }: { artist: BackedArtistInput }) {
         This is permanent. <span className="font-semibold">{artist.name}</span> joins your profile
         with today&apos;s date, and can&apos;t be removed or edited later.
       </p>
+      {artist.listenersAtBacking === null ? (
+        <p className="mt-2 text-sm text-muted">
+          There&apos;s no listener count for them, so this card will have no starting number, no
+          band and no tier — and because backings can never be edited, it can&apos;t be filled in
+          afterwards. You may prefer to wait.
+        </p>
+      ) : (
+        <p className="mt-2 text-sm text-muted">
+          Their count of{" "}
+          <span className="font-mono text-ink">
+            {artist.listenersAtBacking.toLocaleString()}
+          </span>{" "}
+          monthly listeners is what gets locked in.
+        </p>
+      )}
       <div className="mt-3 flex gap-2">
         <button
           onClick={() => setConfirming(false)}

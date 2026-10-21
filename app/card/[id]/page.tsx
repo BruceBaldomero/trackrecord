@@ -100,9 +100,10 @@ export default function CardPage() {
           {/* Numbers */}
           {card.pending ? (
             <div className="mt-4 rounded-xl border border-line bg-surface/60 px-4 py-4 text-sm text-muted">
-              <span className="text-ink">No listener count yet.</span> The artist and the date are
-              locked in, but their size at the moment you backed them needs the Songstats feed,
-              which isn&apos;t connected. Until then this card has no band and no tier.
+              <span className="text-ink">No listener count on this card.</span> The artist and the
+              date are locked in, but no listener figure was available when it was backed — so it
+              has no band and no tier. Because backings can never be edited, that can&apos;t be
+              filled in retrospectively.
             </div>
           ) : (
             <>

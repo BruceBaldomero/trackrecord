@@ -140,6 +140,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
             name: artist.name,
             genre: artist.genre,
             imageUrl,
+            listenersAtBacking: reading.state === "ok" ? reading.monthlyListeners : null,
           }}
         />
       </div>
