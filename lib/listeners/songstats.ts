@@ -1,4 +1,3 @@
-import { ProviderError } from "../artists/types";
 
 /**
  * Spotify monthly listeners, via Songstats.
@@ -12,12 +11,75 @@ import { ProviderError } from "../artists/types";
 
 const BASE = process.env.SONGSTATS_API_BASE ?? "https://api.songstats.com/enterprise/v1";
 
-export type ListenerReading = {
-  spotifyArtistId: string;
-  monthlyListeners: number;
-  /** Raw payload, kept so a shape surprise can be diagnosed rather than guessed at. */
-  raw?: unknown;
-};
+export type ListenerResult =
+  | { state: "ok"; spotifyArtistId: string; monthlyListeners: number; raw: unknown }
+  /** Songstats authenticated us fine but doesn't carry this artist. Expected, not a fault. */
+  | { state: "not-tracked"; spotifyArtistId: string }
+  | { state: "error"; spotifyArtistId: string; message: string };
+
+export async function monthlyListenersFor(spotifyArtistId: string): Promise<ListenerResult> {
+  const key = process.env.SONGSTATS_API_KEY;
+  if (!key) {
+    return {
+      state: "error",
+      spotifyArtistId,
+      message: "No Songstats key configured — set SONGSTATS_API_KEY in .env.local",
+    };
+  }
+
+  const url = `${BASE}/artists/stats?spotify_artist_id=${encodeURIComponent(
+    spotifyArtistId
+  )}&source=spotify`;
+
+  let response: Response;
+  try {
+    response = await fetch(url, { headers: { apikey: key, Accept: "application/json" } });
+  } catch (cause) {
+    return {
+      state: "error",
+      spotifyArtistId,
+      message: `Couldn't reach Songstats: ${(cause as Error).message}`,
+    };
+  }
+
+  const body = await response.text();
+  let json: unknown;
+  try {
+    json = JSON.parse(body);
+  } catch {
+    return {
+      state: "error",
+      spotifyArtistId,
+      message: `Songstats returned ${response.status} and something that isn't JSON: ${body.slice(0, 200)}`,
+    };
+  }
+
+  const message = (json as { message?: unknown })?.message;
+  if (response.status === 404 || (typeof message === "string" && /not found/i.test(message))) {
+    return { state: "not-tracked", spotifyArtistId };
+  }
+
+  if (!response.ok) {
+    return {
+      state: "error",
+      spotifyArtistId,
+      message: `Songstats refused the request (${response.status}): ${body.slice(0, 300)}`,
+    };
+  }
+
+  const monthlyListeners = findMonthlyListeners(json);
+  if (monthlyListeners === null) {
+    return {
+      state: "error",
+      spotifyArtistId,
+      message:
+        "Songstats answered, but no monthly-listeners figure was found. The payload shape " +
+        `differs from what was expected: ${body.slice(0, 300)}`,
+    };
+  }
+
+  return { state: "ok", spotifyArtistId, monthlyListeners, raw: json };
+}
 
 /**
  * Songstats nests its numbers differently per endpoint and plan, and their docs aren't
@@ -52,50 +114,4 @@ export function findMonthlyListeners(json: unknown): number | null {
 
 export function isConfigured(): boolean {
   return Boolean(process.env.SONGSTATS_API_KEY);
-}
-
-export async function monthlyListenersFor(spotifyArtistId: string): Promise<ListenerReading> {
-  const key = process.env.SONGSTATS_API_KEY;
-  if (!key) {
-    throw new ProviderError("No Songstats key configured — set SONGSTATS_API_KEY in .env.local");
-  }
-
-  const url = `${BASE}/artists/stats?spotify_artist_id=${encodeURIComponent(
-    spotifyArtistId
-  )}&source=spotify`;
-
-  let response: Response;
-  try {
-    response = await fetch(url, {
-      headers: { apikey: key, Accept: "application/json" },
-    });
-  } catch (cause) {
-    throw new ProviderError("Couldn't reach Songstats.", cause);
-  }
-
-  const body = await response.text();
-  let json: unknown;
-  try {
-    json = JSON.parse(body);
-  } catch {
-    throw new ProviderError(
-      `Songstats returned ${response.status} and something that isn't JSON: ${body.slice(0, 200)}`
-    );
-  }
-
-  if (!response.ok) {
-    throw new ProviderError(
-      `Songstats refused the request (${response.status}): ${body.slice(0, 300)}`
-    );
-  }
-
-  const monthlyListeners = findMonthlyListeners(json);
-  if (monthlyListeners === null) {
-    throw new ProviderError(
-      "Songstats answered, but no monthly-listeners figure was found in the response. " +
-        "The payload shape differs from what was expected — see the raw output."
-    );
-  }
-
-  return { spotifyArtistId, monthlyListeners, raw: json };
 }

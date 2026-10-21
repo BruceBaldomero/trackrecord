@@ -43,13 +43,13 @@ export async function GET(request: NextRequest) {
   if (!spotifyArtistId) return NextResponse.json({ query, steps }, { status: 404 });
 
   // 3 — ask Songstats for the listener count
-  try {
-    const reading = await monthlyListenersFor(spotifyArtistId);
-    steps.songstats = { ok: true, monthlyListeners: reading.monthlyListeners, raw: reading.raw };
-  } catch (error) {
-    steps.songstats = { ok: false, error: (error as Error).message };
-    return NextResponse.json({ query, steps }, { status: 502 });
-  }
+  const reading = await monthlyListenersFor(spotifyArtistId);
+  steps.songstats =
+    reading.state === "ok"
+      ? { ok: true, monthlyListeners: reading.monthlyListeners, raw: reading.raw }
+      : reading.state === "not-tracked"
+        ? { ok: false, reason: "Songstats doesn't carry this artist", spotifyArtistId }
+        : { ok: false, error: reading.message, spotifyArtistId };
 
-  return NextResponse.json({ query, steps });
+  return NextResponse.json({ query, steps }, { status: reading.state === "ok" ? 200 : 502 });
 }

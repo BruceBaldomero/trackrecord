@@ -12,18 +12,9 @@ import { isConfigured, monthlyListenersFor } from "@/lib/listeners/songstats";
  * would burn through the allowance ten artists at a time for no benefit.
  */
 async function listenerReading(spotifyId: string | null) {
-  if (!spotifyId) {
-    return { state: "no-spotify-id" as const };
-  }
-  if (!isConfigured()) {
-    return { state: "no-key" as const };
-  }
-  try {
-    const reading = await monthlyListenersFor(spotifyId);
-    return { state: "ok" as const, listeners: reading.monthlyListeners };
-  } catch (error) {
-    return { state: "error" as const, message: (error as Error).message };
-  }
+  if (!spotifyId) return { state: "no-spotify-id" as const };
+  if (!isConfigured()) return { state: "no-key" as const };
+  return monthlyListenersFor(spotifyId);
 }
 
 export default async function ArtistPage({ params }: { params: Promise<{ id: string }> }) {
@@ -54,7 +45,7 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
     listenerReading(spotifyId),
   ]);
 
-  const band = reading.state === "ok" ? bandFor(reading.listeners) : null;
+  const band = reading.state === "ok" ? bandFor(reading.monthlyListeners) : null;
 
   return (
     <Shell>
@@ -90,11 +81,11 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
           {reading.state === "ok" ? (
             <>
               <div className="font-mono text-4xl tracking-tight">
-                {reading.listeners.toLocaleString()}
+                {reading.monthlyListeners.toLocaleString()}
               </div>
               <p className="mt-2 text-sm text-muted">
-                {formatListeners(reading.listeners)} on Spotify, via Songstats. Backing them now
-                locks this number onto your card permanently.
+                {formatListeners(reading.monthlyListeners)} on Spotify, via Songstats. Backing them
+                now locks this number onto your card permanently.
               </p>
             </>
           ) : reading.state === "no-key" ? (
@@ -107,10 +98,35 @@ export default async function ArtistPage({ params }: { params: Promise<{ id: str
               MusicBrainz has no Spotify link for this artist, so their listener count can&apos;t
               be looked up. Common for very new or very obscure acts.
             </p>
+          ) : reading.state === "not-tracked" ? (
+            <div className="text-sm">
+              <p className="text-ink">Songstats doesn&apos;t track this artist.</p>
+              <p className="mt-2 text-muted">
+                They authenticated us fine — this artist simply isn&apos;t in their database, which
+                is common for very small acts. Without a listener count there&apos;s no band and no
+                tier, so a card for them would record only the name and the date.
+              </p>
+              <p className="mt-3 text-xs text-faint">
+                Looked up Spotify ID{" "}
+                <a
+                  href={`https://open.spotify.com/artist/${reading.spotifyArtistId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-mono text-muted underline underline-offset-2 hover:text-ink"
+                >
+                  {reading.spotifyArtistId}
+                </a>{" "}
+                — open it to check we matched the right act.
+              </p>
+            </div>
           ) : (
             <div className="text-sm">
               <p className="text-rose-300">Couldn&apos;t get a listener count.</p>
               <p className="mt-2 font-mono text-xs break-words text-muted">{reading.message}</p>
+              <p className="mt-3 text-xs text-faint">
+                Spotify ID sent:{" "}
+                <span className="font-mono">{reading.spotifyArtistId}</span>
+              </p>
             </div>
           )}
         </div>
