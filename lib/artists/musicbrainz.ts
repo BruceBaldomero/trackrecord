@@ -126,6 +126,45 @@ export async function spotifyIdFor(musicBrainzId: string): Promise<string | null
   }
 }
 
+/** One artist by MusicBrainz ID, with their tags and external links in a single call. */
+export function parseArtistLookup(
+  json: unknown
+): { artist: ExternalArtist; spotifyId: string | null } | null {
+  const raw = json as MusicBrainzArtist & { relations?: unknown };
+  if (typeof raw?.id !== "string" || typeof raw?.name !== "string") return null;
+
+  return {
+    artist: {
+      source: "musicbrainz",
+      externalId: raw.id,
+      name: raw.name,
+      genre: topTag(raw.tags),
+      disambiguation:
+        typeof raw.disambiguation === "string" && raw.disambiguation.length > 0
+          ? raw.disambiguation
+          : null,
+      imageUrl: null,
+    },
+    spotifyId: parseSpotifyId(json),
+  };
+}
+
+export async function lookupArtist(musicBrainzId: string) {
+  const url = `${ENDPOINT}/${encodeURIComponent(musicBrainzId)}?inc=url-rels+tags&fmt=json`;
+  let response: Response;
+  try {
+    response = await throttle(() =>
+      fetch(url, { headers: { "User-Agent": userAgent(), Accept: "application/json" } })
+    );
+  } catch (cause) {
+    throw new ProviderError("Couldn't reach the artist database.", cause);
+  }
+  if (!response.ok) {
+    throw new ProviderError(`Couldn't load that artist (${response.status}).`);
+  }
+  return parseArtistLookup(await response.json());
+}
+
 export async function searchArtists(query: string, limit = 10): Promise<ExternalArtist[]> {
   const q = query.trim();
   if (!q) return [];
