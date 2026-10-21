@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseSearchResponse, userAgent } from "./musicbrainz";
+import { parseSearchResponse, parseSpotifyId, userAgent } from "./musicbrainz";
 
 // Shaped on a real MusicBrainz /ws/2/artist?query=… response.
 const RESPONSE = {
@@ -104,6 +104,35 @@ describe("ranking", () => {
   it("treats a missing score as the weakest possible", () => {
     const mixed = { artists: [{ id: "a", name: "No Score" }, { id: "b", name: "Scored", score: 90 }] };
     expect(parseSearchResponse(mixed).map((a) => a.name)).toEqual(["Scored"]);
+  });
+});
+
+describe("parseSpotifyId", () => {
+  // MusicBrainz IDs and Spotify IDs are different systems; Songstats needs the latter.
+  it("pulls the Spotify artist ID out of an artist's external links", () => {
+    const payload = {
+      relations: [
+        { type: "wikidata", url: { resource: "https://www.wikidata.org/wiki/Q123" } },
+        {
+          type: "free streaming",
+          url: { resource: "https://open.spotify.com/artist/6l3HvQ5sa6mXTsMTB19rO5" },
+        },
+      ],
+    };
+    expect(parseSpotifyId(payload)).toBe("6l3HvQ5sa6mXTsMTB19rO5");
+  });
+
+  it("returns null when the artist has no Spotify link", () => {
+    const payload = {
+      relations: [{ type: "discogs", url: { resource: "https://www.discogs.com/artist/1" } }],
+    };
+    expect(parseSpotifyId(payload)).toBeNull();
+  });
+
+  it("survives malformed payloads", () => {
+    expect(parseSpotifyId({})).toBeNull();
+    expect(parseSpotifyId(null)).toBeNull();
+    expect(parseSpotifyId({ relations: [{ url: {} }, {}] })).toBeNull();
   });
 });
 

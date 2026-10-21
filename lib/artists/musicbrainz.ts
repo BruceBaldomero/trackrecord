@@ -95,6 +95,37 @@ function topTag(tags: unknown): string | null {
   return ranked[0].name.replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+/**
+ * Songstats keys artists by Spotify ID, but our search returns MusicBrainz IDs — different
+ * identifier systems entirely. MusicBrainz records an artist's external links, so it can
+ * bridge the two. Not every artist has a Spotify link, so null is an expected answer.
+ */
+export function parseSpotifyId(json: unknown): string | null {
+  const relations = (json as { relations?: unknown })?.relations;
+  if (!Array.isArray(relations)) return null;
+
+  for (const relation of relations) {
+    const resource = (relation as { url?: { resource?: unknown } })?.url?.resource;
+    if (typeof resource !== "string") continue;
+    const match = resource.match(/open\.spotify\.com\/artist\/([A-Za-z0-9]+)/);
+    if (match) return match[1];
+  }
+  return null;
+}
+
+export async function spotifyIdFor(musicBrainzId: string): Promise<string | null> {
+  const url = `${ENDPOINT}/${encodeURIComponent(musicBrainzId)}?inc=url-rels&fmt=json`;
+  try {
+    const response = await throttle(() =>
+      fetch(url, { headers: { "User-Agent": userAgent(), Accept: "application/json" } })
+    );
+    if (!response.ok) return null;
+    return parseSpotifyId(await response.json());
+  } catch {
+    return null;
+  }
+}
+
 export async function searchArtists(query: string, limit = 10): Promise<ExternalArtist[]> {
   const q = query.trim();
   if (!q) return [];
