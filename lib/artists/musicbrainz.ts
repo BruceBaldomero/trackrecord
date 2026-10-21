@@ -24,8 +24,14 @@ function throttle<T>(run: () => Promise<T>): Promise<T> {
 
 /** MusicBrainz requires a descriptive User-Agent with contact details, or it blocks you. */
 export function userAgent(): string {
-  const contact = process.env.MUSICBRAINZ_CONTACT ?? "https://github.com/BruceBaldomero/trackrecord";
-  return `TrackRecord/0.1.0 ( ${contact} )`;
+  const contact = process.env.MUSICBRAINZ_CONTACT;
+  if (!contact) {
+    console.warn(
+      "MUSICBRAINZ_CONTACT is not set. MusicBrainz throttles clients that don't give a " +
+        "contact address — put MUSICBRAINZ_CONTACT=you@example.com in .env.local"
+    );
+  }
+  return `TrackRecord/0.1.0 ( ${contact ?? "https://github.com/BruceBaldomero/trackrecord"} )`;
 }
 
 type MusicBrainzArtist = {
@@ -76,21 +82,41 @@ export async function searchArtists(query: string, limit = 10): Promise<External
 
   const url = `${ENDPOINT}?query=${encodeURIComponent(q)}&fmt=json&limit=${limit}`;
 
-  let response: Response;
-  try {
-    response = await throttle(() =>
-      fetch(url, { headers: { "User-Agent": userAgent(), Accept: "application/json" } })
+  // MusicBrainz answers 503 both for genuine rate limiting and for transient load, and
+  // asks clients to back off and retry rather than treat it as fatal.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    let response: Response;
+    try {
+      response = await throttle(() =>
+        fetch(url, { headers: { "User-Agent": userAgent(), Accept: "application/json" } })
+      );
+    } catch (cause) {
+      throw new ProviderError("Couldn't reach the artist database. Try again in a moment.", cause);
+    }
+
+    if (response.ok) {
+      return parseSearchResponse(await response.json());
+    }
+
+    // The body carries MusicBrainz's own explanation, which is the only way to tell a
+    // rate-limit apart from a rejected User-Agent.
+    const detail = (await response.text().catch(() => "")).slice(0, 300);
+    console.error(
+      `MusicBrainz ${response.status} for "${q}" (attempt ${attempt + 1}) ` +
+        `ua="${userAgent()}" body=${JSON.stringify(detail)}`
     );
-  } catch (cause) {
-    throw new ProviderError("Couldn't reach the artist database. Try again in a moment.", cause);
+
+    if (response.status === 503 && attempt === 0) {
+      await new Promise((r) => setTimeout(r, 1500));
+      continue;
+    }
+
+    throw new ProviderError(
+      response.status === 503
+        ? `The artist database turned us away (503). ${detail || "No reason given."}`
+        : `Artist search failed (${response.status}). ${detail || "Try again in a moment."}`
+    );
   }
 
-  if (response.status === 503) {
-    throw new ProviderError("The artist database is rate-limiting us. Try again in a moment.");
-  }
-  if (!response.ok) {
-    throw new ProviderError(`Artist search failed (${response.status}). Try again in a moment.`);
-  }
-
-  return parseSearchResponse(await response.json());
+  return [];
 }
