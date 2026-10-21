@@ -37,31 +37,50 @@ export function userAgent(): string {
 type MusicBrainzArtist = {
   id?: unknown;
   name?: unknown;
+  score?: unknown;
   disambiguation?: unknown;
   tags?: unknown;
 };
+
+/**
+ * MusicBrainz scores each hit 0-100 and matches loosely across every field, so a search for
+ * "wet leg" also returns Wet Wet Wet and anyone whose band member is in Wet Leg. Results
+ * are ranked by that score and the stragglers dropped, relative to the best hit rather than
+ * against a fixed number — an obscure artist's best match may score lower across the board.
+ */
+const RELATIVE_SCORE_FLOOR = 0.5;
 
 /** Split out from the request so the shape handling is testable without a network call. */
 export function parseSearchResponse(json: unknown): ExternalArtist[] {
   const artists = (json as { artists?: unknown })?.artists;
   if (!Array.isArray(artists)) return [];
 
-  return artists.flatMap((raw: MusicBrainzArtist) => {
+  const scored = artists.flatMap((raw: MusicBrainzArtist) => {
     if (typeof raw?.id !== "string" || typeof raw?.name !== "string") return [];
     return [
       {
-        source: "musicbrainz" as const,
-        externalId: raw.id,
-        name: raw.name,
-        genre: topTag(raw.tags),
-        disambiguation:
-          typeof raw.disambiguation === "string" && raw.disambiguation.length > 0
-            ? raw.disambiguation
-            : null,
-        imageUrl: null,
+        score: typeof raw.score === "number" ? raw.score : 0,
+        artist: {
+          source: "musicbrainz" as const,
+          externalId: raw.id,
+          name: raw.name,
+          genre: topTag(raw.tags),
+          disambiguation:
+            typeof raw.disambiguation === "string" && raw.disambiguation.length > 0
+              ? raw.disambiguation
+              : null,
+          imageUrl: null,
+        },
       },
     ];
   });
+
+  if (scored.length === 0) return [];
+
+  scored.sort((a, b) => b.score - a.score);
+  const floor = scored[0].score * RELATIVE_SCORE_FLOOR;
+
+  return scored.filter((s) => s.score >= floor).map((s) => s.artist);
 }
 
 function topTag(tags: unknown): string | null {
