@@ -81,23 +81,43 @@ The project has to stay close to free while it's unvalidated.
   the rest just quietly stop moving.
 - Stay on free tiers (Supabase, Vercel) unless we agree otherwise.
 
-## Artist data source — UNRESOLVED, do not assume Spotify
+## Artist data source — Spotify is out; consolidating onto Songstats
 
 **Spotify's Web API is not available to this project.** Since Feb 2026 development mode is
 capped at **5 users** and requires the app owner to hold Spotify Premium; extended quota
 mode requires a registered organisation with **250k+ monthly active users**. A pre-launch
-consumer app cannot get from one to the other. Earlier versions of this file and Jack's
-proposal doc both assumed free Spotify search — that assumption is wrong.
+consumer app cannot get from one to the other. Jack's proposal doc assumes free Spotify
+search — that assumption is wrong. Don't build a Spotify client.
 
-Artist search, artist images and monthly listeners therefore need a provider that is
-actually open to us. Preferred: Songstats for all three, if their API does search and
-serves images (open question with Evan at Songstats). Fallbacks: MusicBrainz (free,
-canonical IDs, ~1 req/sec, needs a descriptive User-Agent, no images), iTunes Search (no
-auth), Discogs (token, weak images), with images from Wikidata or Discogs subject to
-licensing.
+**What's running now:** MusicBrainz for artist search and identity, iTunes Search for
+artwork, Songstats for monthly listeners. Verified working end to end against a live
+server. Three weaknesses: MusicBrainz's ~1 req/sec limit makes search slow; iTunes is
+matched by *name*, so same-named artists can't be told apart and lose their artwork; and
+Songstats needs a Spotify ID, which is derived from an artist's MusicBrainz external links
+and is often missing for small artists.
 
-Until this is settled, do not build a Spotify client. Model artists with a generic
-`external_id` + `source` so the provider can change without a migration.
+**Where it's going:** Songstats' own docs confirm `/artists/search` (returns name, their
+artist ID and an `avatar` image) and `/artists/info`. That makes Songstats a single source
+for search, images *and* listeners, removing all three weaknesses above and the ID bridge
+entirely.
+
+Blocked on Evan at Songstats confirming those endpoints are included and what they cost —
+the €0.025/unique artist quote was explicitly for "access only to" the monthly listeners
+endpoint. Asked 21 Oct 2026. **Don't rebuild onto those endpoints until he confirms.**
+
+Keep modelling artists as `source` + `external_id` so the provider can change without a
+migration.
+
+## Verified facts about the Songstats API
+
+From their docs, confirmed against a live call:
+
+- `GET /artists/stats` — `source` is **required** (e.g. `spotify`); identify the artist with
+  `songstats_artist_id`, `spotify_artist_id` or `apple_music_artist_id`.
+- Monthly listeners come back as `stats[].data.monthly_listeners_current`.
+- A missing artist returns 404 `{"result":"error","message":"Artist not found."}` — an
+  expected outcome for small artists, not a fault. Handle it, don't treat it as an error.
+- The test key is limited to 20 unique artists.
 
 ## Testing
 
@@ -108,6 +128,24 @@ Until this is settled, do not build a Spotify client. Model artists with a gener
 
 ## Current state
 
-Everything on screen is placeholder data (`lib/data.ts`). No database, no auth, no API
-calls. `demo/trackrecord.html` is a standalone single-file copy for sharing — if you change
-the prototype's behaviour or data, update it too, or say explicitly that it's now stale.
+**Working, live:** artist search (`/back` → `/api/artists/search`), artist pages
+(`/artist/[id]`) showing artwork and a real Songstats listener count, and backing an artist
+from there, which captures that count onto the card.
+
+**Built but not connected:** `supabase/migrations/0001_initial_schema.sql` — the full schema
+with backing immutability enforced by trigger, tested in-process with PGlite
+(`lib/db/schema.test.ts`). No Supabase project exists yet, so nothing runs against it.
+
+**Still placeholder:** the demo profiles, cards and feed in `lib/data.ts`. Those cards are
+badged "Sample" in the UI; anything backed through live search is real.
+
+**Not started:** accounts and auth, the weekly refresh job, deployment.
+
+`demo/trackrecord.html` is a standalone single-file copy published as a shared artifact. It
+is sandboxed and cannot call any API, so it only ever searches its 30 invented artists —
+it's a design demo, and says so. Keep it in step with UI changes, or say it's stale.
+
+**Note on environment:** the cloud environment this is often built in blocks all outbound
+API hosts (MusicBrainz, iTunes, Songstats, Supabase). Integration code can be written and
+unit-tested against fixtures there, but only verified by running locally. Don't claim an
+integration works on the strength of code alone.
