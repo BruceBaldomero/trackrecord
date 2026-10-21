@@ -19,8 +19,8 @@ export default function RootLayout({
           <Nav />
           <main>{children}</main>
           <footer className="mt-24 border-t border-line py-8 text-center text-xs text-faint">
-            Track Record — early prototype. All artists and numbers on this build are placeholder
-            data.
+            Track Record — early prototype. Artist search is live; cards marked “Sample” are
+            placeholder data, and listener counts aren&apos;t connected yet.
           </footer>
         </StoreProvider>
       </body>

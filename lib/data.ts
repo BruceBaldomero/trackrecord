@@ -13,6 +13,7 @@ export type Artist = {
   name: string;
   genre: string;
   listeners: number;
+  imageUrl?: string | null;
 };
 
 export type User = {
@@ -23,12 +24,23 @@ export type User = {
   bio: string;
 };
 
+/** An artist backed through live search, captured at the moment of backing. */
+export type BackedArtist = {
+  source: string;
+  name: string;
+  genre: string | null;
+  imageUrl: string | null;
+};
+
 export type Back = {
   id: string;
   userId: string;
   artistId: string;
   backedAt: string;
-  listenersAtBacking: number;
+  /** Null for artists backed live: there is no listener source wired up yet. */
+  listenersAtBacking: number | null;
+  /** Present for live-backed artists; absent for the built-in sample data. */
+  artist?: BackedArtist;
 };
 
 export const ARTISTS: Artist[] = [
@@ -113,12 +125,16 @@ export type Card = {
   user: User;
   artist: Artist;
   backedAt: string;
-  listenersAtBacking: number;
-  listenersNow: number;
-  bandAtBacking: Band;
-  bandNow: Band;
+  listenersAtBacking: number | null;
+  listenersNow: number | null;
+  bandAtBacking: Band | null;
+  bandNow: Band | null;
   bandsGained: number;
   tier: Tier;
+  /** True for the built-in demo cards, false for anything backed through live search. */
+  isSample: boolean;
+  /** True when we have no listener figure yet, so there's no band and no tier to show. */
+  pending: boolean;
 };
 
 export function artistById(id: string): Artist | undefined {
@@ -134,23 +150,61 @@ export function userByUsername(username: string): User | undefined {
 }
 
 export function toCard(back: Back): Card | null {
-  const artist = artistById(back.artistId);
   const user = userById(back.userId);
-  if (!artist || !user) return null;
-  const bandAtBacking = bandFor(back.listenersAtBacking);
-  const bandNow = bandFor(artist.listeners);
+  if (!user) return null;
+
+  const live = back.artist;
+  const sample = live ? undefined : artistById(back.artistId);
+  if (!live && !sample) return null;
+
+  const artist: Artist = live
+    ? {
+        id: back.artistId,
+        name: live.name,
+        genre: live.genre ?? "Unknown genre",
+        listeners: 0,
+        imageUrl: live.imageUrl,
+      }
+    : sample!;
+
+  // Live-backed artists have no listener source yet (Songstats isn't wired up), so the
+  // card exists but honestly reports that it doesn't know the numbers.
+  const listenersAtBacking = back.listenersAtBacking;
+  const listenersNow = live ? null : sample!.listeners;
+
+  if (listenersAtBacking === null || listenersNow === null) {
+    return {
+      id: back.id,
+      user,
+      artist,
+      backedAt: back.backedAt,
+      listenersAtBacking,
+      listenersNow,
+      bandAtBacking: listenersAtBacking === null ? null : bandFor(listenersAtBacking),
+      bandNow: null,
+      bandsGained: 0,
+      tier: "none",
+      isSample: !live,
+      pending: true,
+    };
+  }
+
+  const bandAtBacking = bandFor(listenersAtBacking);
+  const bandNow = bandFor(listenersNow);
   const bandsGained = bandNow.id - bandAtBacking.id;
   return {
     id: back.id,
     user,
     artist,
     backedAt: back.backedAt,
-    listenersAtBacking: back.listenersAtBacking,
-    listenersNow: artist.listeners,
+    listenersAtBacking,
+    listenersNow,
     bandAtBacking,
     bandNow,
     bandsGained,
     tier: tierFor(bandsGained),
+    isSample: !live,
+    pending: false,
   };
 }
 
@@ -184,8 +238,13 @@ export type ProfileStats = {
 
 export function statsFor(cards: Card[]): ProfileStats {
   const upgraded = cards.filter((c) => c.bandsGained > 0).length;
-  const avgGrowth = cards.length
-    ? cards.reduce((sum, c) => sum + growthPct(c.listenersAtBacking, c.listenersNow), 0) / cards.length
+  // Cards with no listener figure yet can't contribute to a growth average.
+  const measured = cards.filter((c) => !c.pending);
+  const avgGrowth = measured.length
+    ? measured.reduce(
+        (sum, c) => sum + growthPct(c.listenersAtBacking!, c.listenersNow!),
+        0
+      ) / measured.length
     : 0;
   const best = cards.reduce((m, c) => Math.max(m, c.bandsGained), 0);
   return { cards: cards.length, upgraded, avgGrowth, bestTier: tierFor(best) };
@@ -213,6 +272,7 @@ export const ACTIVITY: ActivityItem[] = [
 
 /** Deterministic monthly listener series between backing and now, for card charts. */
 export function listenerHistory(card: Card): { date: string; value: number }[] {
+  if (card.pending || card.listenersAtBacking === null || card.listenersNow === null) return [];
   const start = parseDay(card.backedAt);
   const end = new Date();
   const months = Math.max(

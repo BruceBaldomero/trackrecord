@@ -39,9 +39,17 @@ function subscribe(listener: () => void) {
 
 type StoreValue = {
   extraBacks: Back[];
-  backArtist: (artistId: string, listeners: number) => void;
+  backArtist: (artist: BackedArtistInput) => void;
   picksLeft: number;
   reset: () => void;
+};
+
+export type BackedArtistInput = {
+  source: string;
+  externalId: string;
+  name: string;
+  genre: string | null;
+  imageUrl: string | null;
 };
 
 const StoreContext = createContext<StoreValue | null>(null);
@@ -49,17 +57,25 @@ const StoreContext = createContext<StoreValue | null>(null);
 export function StoreProvider({ children }: { children: React.ReactNode }) {
   const extraBacks = useSyncExternalStore(subscribe, read, () => EMPTY);
 
-  const backArtist = useCallback((artistId: string, listenerCount: number) => {
+  const backArtist = useCallback((artist: BackedArtistInput) => {
     const current = read();
-    if (current.some((b) => b.artistId === artistId)) return;
+    if (current.some((b) => b.artistId === artist.externalId)) return;
     write([
       ...current,
       {
-        id: `new-${artistId}`,
+        id: `new-${artist.externalId}`,
         userId: CURRENT_USER_ID,
-        artistId,
+        artistId: artist.externalId,
         backedAt: todayISO(),
-        listenersAtBacking: listenerCount,
+        // No listener source is wired up yet, so the card records that it doesn't know
+        // rather than inventing a number onto a permanent record.
+        listenersAtBacking: null,
+        artist: {
+          source: artist.source,
+          name: artist.name,
+          genre: artist.genre,
+          imageUrl: artist.imageUrl,
+        },
       },
     ]);
   }, []);

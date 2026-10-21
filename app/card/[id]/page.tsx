@@ -40,7 +40,7 @@ export default function CardPage() {
   }
 
   const rank = backers.findIndex((b) => b.id === card.id) + 1;
-  const accent = card.bandNow.accent;
+  const accent = card.bandNow?.accent ?? "#e8b64c";
 
   async function share() {
     try {
@@ -73,9 +73,16 @@ export default function CardPage() {
               </Link>{" "}
               backed{" "}
               <span className="text-accent">{card.artist.name}</span> in{" "}
-              {formatMonthYear(card.backedAt)} at{" "}
-              <span className="font-mono">{card.listenersAtBacking.toLocaleString()}</span> monthly
-              listeners.
+              {formatMonthYear(card.backedAt)}
+              {card.listenersAtBacking !== null ? (
+                <>
+                  {" "}
+                  at <span className="font-mono">{card.listenersAtBacking.toLocaleString()}</span>{" "}
+                  monthly listeners.
+                </>
+              ) : (
+                "."
+              )}
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <button
@@ -91,38 +98,50 @@ export default function CardPage() {
           </div>
 
           {/* Numbers */}
-          <div className="mt-4 grid grid-cols-3 gap-3">
-            <div className="rounded-xl border border-line bg-surface/60 px-4 py-3">
-              <div className="text-xs text-muted">At backing</div>
-              <div className="mt-1 font-mono text-lg">
-                {formatListeners(card.listenersAtBacking)}
+          {card.pending ? (
+            <div className="mt-4 rounded-xl border border-line bg-surface/60 px-4 py-4 text-sm text-muted">
+              <span className="text-ink">No listener count yet.</span> The artist and the date are
+              locked in, but their size at the moment you backed them needs the Songstats feed,
+              which isn&apos;t connected. Until then this card has no band and no tier.
+            </div>
+          ) : (
+            <>
+              <div className="mt-4 grid grid-cols-3 gap-3">
+                <div className="rounded-xl border border-line bg-surface/60 px-4 py-3">
+                  <div className="text-xs text-muted">At backing</div>
+                  <div className="mt-1 font-mono text-lg">
+                    {formatListeners(card.listenersAtBacking!)}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-line bg-surface/60 px-4 py-3">
+                  <div className="text-xs text-muted">Today</div>
+                  <div className="mt-1 font-mono text-lg">
+                    {formatListeners(card.listenersNow!)}
+                  </div>
+                </div>
+                <div className="rounded-xl border border-line bg-surface/60 px-4 py-3">
+                  <div className="text-xs text-muted">Growth</div>
+                  <div className="mt-1 font-mono text-lg text-emerald-400">
+                    {formatGrowth(card.listenersAtBacking!, card.listenersNow!)}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="rounded-xl border border-line bg-surface/60 px-4 py-3">
-              <div className="text-xs text-muted">Today</div>
-              <div className="mt-1 font-mono text-lg">{formatListeners(card.listenersNow)}</div>
-            </div>
-            <div className="rounded-xl border border-line bg-surface/60 px-4 py-3">
-              <div className="text-xs text-muted">Growth</div>
-              <div className="mt-1 font-mono text-lg text-emerald-400">
-                {formatGrowth(card.listenersAtBacking, card.listenersNow)}
-              </div>
-            </div>
-          </div>
 
-          {/* Band journey */}
-          <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface/60 px-4 py-3.5">
-            <BandPill band={card.bandAtBacking} muted />
-            <span className="text-faint">→</span>
-            <BandPill band={card.bandNow} />
-            <span className="ml-auto text-sm text-muted">
-              {card.bandsGained > 0
-                ? `${TIER_LABEL[card.tier]} card · +${card.bandsGained} band${
-                    card.bandsGained > 1 ? "s" : ""
-                  }`
-                : "No band change yet"}
-            </span>
-          </div>
+              {/* Band journey */}
+              <div className="mt-4 flex flex-wrap items-center gap-3 rounded-xl border border-line bg-surface/60 px-4 py-3.5">
+                <BandPill band={card.bandAtBacking!} muted />
+                <span className="text-faint">→</span>
+                <BandPill band={card.bandNow!} />
+                <span className="ml-auto text-sm text-muted">
+                  {card.bandsGained > 0
+                    ? `${TIER_LABEL[card.tier]} card · +${card.bandsGained} band${
+                        card.bandsGained > 1 ? "s" : ""
+                      }`
+                    : "No band change yet"}
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
@@ -159,7 +178,7 @@ export default function CardPage() {
                 <div className="text-xs text-muted">{formatDate(b.backedAt)}</div>
               </div>
               <span className="font-mono text-xs text-muted">
-                {formatListeners(b.listenersAtBacking)}
+                {b.listenersAtBacking === null ? "—" : formatListeners(b.listenersAtBacking)}
               </span>
             </Link>
           ))}

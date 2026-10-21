@@ -53,13 +53,13 @@ export default function Home() {
           </div>
         </div>
 
-        {hero && (
+        {hero && !hero.pending && (
           <div className="relative mx-auto w-full max-w-[280px]">
             <div className="absolute -inset-8 -z-10 rounded-full bg-accent/10 blur-3xl" />
             <ArtistCard card={hero} />
             <p className="mt-4 text-center text-xs text-faint">
-              Backed at {formatListeners(hero.listenersAtBacking)} monthly listeners. Now{" "}
-              {formatListeners(hero.listenersNow)}.
+              Backed at {formatListeners(hero.listenersAtBacking!)} monthly listeners. Now{" "}
+              {formatListeners(hero.listenersNow!)}.
             </p>
           </div>
         )}
