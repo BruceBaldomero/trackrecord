@@ -14,6 +14,7 @@ export default function BackPage() {
   const [status, setStatus] = useState<"idle" | "searching" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const requestId = useRef(0);
+  const inFlight = useRef<AbortController | null>(null);
 
   const alreadyBacked = new Set<string>([
     ...BACKS.filter((b) => b.userId === CURRENT_USER_ID).map((b) => b.artistId),
@@ -22,15 +23,24 @@ export default function BackPage() {
 
   const search = useCallback(async (q: string) => {
     const id = ++requestId.current;
+
+    // Abandon whatever the previous keystroke asked for — nobody is waiting for it now.
+    inFlight.current?.abort();
+
     if (q.trim().length < 2) {
       setResults([]);
       setStatus("idle");
       return;
     }
 
+    const controller = new AbortController();
+    inFlight.current = controller;
+
     setStatus("searching");
     try {
-      const response = await fetch(`/api/artists/search?q=${encodeURIComponent(q)}`);
+      const response = await fetch(`/api/artists/search?q=${encodeURIComponent(q)}`, {
+        signal: controller.signal,
+      });
       const body = await response.json();
       // A slower earlier search must not overwrite a newer one's results.
       if (id !== requestId.current) return;
@@ -44,8 +54,8 @@ export default function BackPage() {
       setResults(body.artists ?? []);
       setStatus("idle");
       setError(null);
-    } catch {
-      if (id !== requestId.current) return;
+    } catch (err) {
+      if ((err as Error).name === "AbortError" || id !== requestId.current) return;
       setError("Couldn't reach the server. Is the site still running?");
       setStatus("error");
     }

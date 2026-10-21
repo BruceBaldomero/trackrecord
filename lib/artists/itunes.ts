@@ -41,18 +41,28 @@ export function parseArtwork(json: unknown, expectedName: string): string | null
   return null;
 }
 
+import { TtlCache } from "../cache";
+
+/** Cover art barely changes, so cache it hard. */
+const artworkCache = new TtlCache<string | null>(24 * 60 * 60 * 1000);
+
 export async function artworkFor(name: string): Promise<string | null> {
   const term = name.trim();
   if (!term) return null;
 
-  const url = `${ENDPOINT}?term=${encodeURIComponent(term)}&entity=album&limit=5`;
-
-  try {
-    const response = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!response.ok) return null;
-    return parseArtwork(await response.json(), term);
-  } catch {
-    // Artwork is decorative — a card without it still works, so never fail the search.
-    return null;
-  }
+  return artworkCache.wrap(term.toLowerCase(), async () => {
+    const url = `${ENDPOINT}?term=${encodeURIComponent(term)}&entity=album&limit=5`;
+    try {
+      const response = await fetch(url, {
+        headers: { Accept: "application/json" },
+        // Artwork must never hold up a search; without this one slow reply stalls the lot.
+        signal: AbortSignal.timeout(2500),
+      });
+      if (!response.ok) return null;
+      return parseArtwork(await response.json(), term);
+    } catch {
+      // Artwork is decorative — a card without it still works, so never fail the search.
+      return null;
+    }
+  });
 }

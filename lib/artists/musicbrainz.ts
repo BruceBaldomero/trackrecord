@@ -1,6 +1,15 @@
+import { TtlCache } from "../cache";
 import { ExternalArtist, ProviderError } from "./types";
 
 const ENDPOINT = "https://musicbrainz.org/ws/2/artist";
+
+// Searches are cached so the keystrokes of one query ("wet", "wet l", "wet le") don't each
+// pay the rate-limit wait. Artist lookups last longer: an artist's Spotify link is stable.
+const searchCache = new TtlCache<ExternalArtist[]>(10 * 60 * 1000);
+const lookupCache = new TtlCache<{ artist: ExternalArtist; spotifyId: string | null } | null>(
+  60 * 60 * 1000
+);
+const spotifyIdCache = new TtlCache<string | null>(60 * 60 * 1000);
 
 /**
  * MusicBrainz asks for roughly one request per second from a single client and will return
@@ -114,16 +123,21 @@ export function parseSpotifyId(json: unknown): string | null {
 }
 
 export async function spotifyIdFor(musicBrainzId: string): Promise<string | null> {
-  const url = `${ENDPOINT}/${encodeURIComponent(musicBrainzId)}?inc=url-rels&fmt=json`;
-  try {
-    const response = await throttle(() =>
-      fetch(url, { headers: { "User-Agent": userAgent(), Accept: "application/json" } })
-    );
-    if (!response.ok) return null;
-    return parseSpotifyId(await response.json());
-  } catch {
-    return null;
-  }
+  return spotifyIdCache.wrap(musicBrainzId, async () => {
+    const url = `${ENDPOINT}/${encodeURIComponent(musicBrainzId)}?inc=url-rels&fmt=json`;
+    try {
+      const response = await throttle(() =>
+        fetch(url, {
+          headers: { "User-Agent": userAgent(), Accept: "application/json" },
+          signal: AbortSignal.timeout(8000),
+        })
+      );
+      if (!response.ok) return null;
+      return parseSpotifyId(await response.json());
+    } catch {
+      return null;
+    }
+  });
 }
 
 /** One artist by MusicBrainz ID, with their tags and external links in a single call. */
@@ -150,25 +164,34 @@ export function parseArtistLookup(
 }
 
 export async function lookupArtist(musicBrainzId: string) {
-  const url = `${ENDPOINT}/${encodeURIComponent(musicBrainzId)}?inc=url-rels+tags&fmt=json`;
-  let response: Response;
-  try {
-    response = await throttle(() =>
-      fetch(url, { headers: { "User-Agent": userAgent(), Accept: "application/json" } })
-    );
-  } catch (cause) {
-    throw new ProviderError("Couldn't reach the artist database.", cause);
-  }
-  if (!response.ok) {
-    throw new ProviderError(`Couldn't load that artist (${response.status}).`);
-  }
-  return parseArtistLookup(await response.json());
+  return lookupCache.wrap(musicBrainzId, async () => {
+    const url = `${ENDPOINT}/${encodeURIComponent(musicBrainzId)}?inc=url-rels+tags&fmt=json`;
+    let response: Response;
+    try {
+      response = await throttle(() =>
+        fetch(url, {
+          headers: { "User-Agent": userAgent(), Accept: "application/json" },
+          signal: AbortSignal.timeout(8000),
+        })
+      );
+    } catch (cause) {
+      throw new ProviderError("Couldn't reach the artist database.", cause);
+    }
+    if (!response.ok) {
+      throw new ProviderError(`Couldn't load that artist (${response.status}).`);
+    }
+    return parseArtistLookup(await response.json());
+  });
 }
 
 export async function searchArtists(query: string, limit = 10): Promise<ExternalArtist[]> {
   const q = query.trim();
   if (!q) return [];
 
+  return searchCache.wrap(`${q.toLowerCase()}|${limit}`, () => fetchSearch(q, limit));
+}
+
+async function fetchSearch(q: string, limit: number): Promise<ExternalArtist[]> {
   const url = `${ENDPOINT}?query=${encodeURIComponent(q)}&fmt=json&limit=${limit}`;
 
   // MusicBrainz answers 503 both for genuine rate limiting and for transient load, and
@@ -177,7 +200,10 @@ export async function searchArtists(query: string, limit = 10): Promise<External
     let response: Response;
     try {
       response = await throttle(() =>
-        fetch(url, { headers: { "User-Agent": userAgent(), Accept: "application/json" } })
+        fetch(url, {
+          headers: { "User-Agent": userAgent(), Accept: "application/json" },
+          signal: AbortSignal.timeout(8000),
+        })
       );
     } catch (cause) {
       throw new ProviderError("Couldn't reach the artist database. Try again in a moment.", cause);
