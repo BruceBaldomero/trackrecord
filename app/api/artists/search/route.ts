@@ -3,10 +3,14 @@ import { ProviderError, searchWithArtwork } from "@/lib/artists";
 
 /**
  * Artist search runs server-side so the MusicBrainz User-Agent (and, later, any provider
- * key) never reaches the browser. Results are cached briefly because MusicBrainz is
- * rate-limited to about one request per second across the whole app.
+ * key) never reaches the browser.
+ *
+ * Deliberately not route-cached. Next would key its cache on the full URL and happily
+ * persist a failed response in .next/cache, so one rate-limited search would keep
+ * returning that failure for every identical query — surviving restarts. Caching happens
+ * in process instead (lib/cache.ts), where failures are never stored.
  */
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get("q")?.trim() ?? "";
@@ -17,10 +21,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const artists = await searchWithArtwork(query);
-    return NextResponse.json(
-      { artists },
-      { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
-    );
+    return NextResponse.json({ artists });
   } catch (error) {
     const message =
       error instanceof ProviderError
