@@ -112,6 +112,10 @@ create table if not exists backings (
   backed_at            date not null default current_date,
   listeners_at_backing bigint not null,
   band_at_backing      smallint not null,
+  -- A card's number is permanent, so where it came from is part of the record. Without
+  -- this, a future provider switch would leave us unable to say what any given card's
+  -- figure actually measured.
+  listeners_source     text not null default 'songstats',
   seeded               boolean not null default false,
   seeded_note          text,
   created_at           timestamptz not null default now(),
@@ -126,7 +130,9 @@ create table if not exists backings (
     check (backed_at <= current_date),
   -- A backdated row has to say where the date came from.
   constraint backings_seeded_rows_explain_themselves
-    check (not seeded or seeded_note is not null)
+    check (not seeded or seeded_note is not null),
+  constraint backings_listeners_source_valid
+    check (listeners_source in ('songstats', 'soundcharts'))
 );
 
 -- on delete restrict above is deliberate. Deleting an account must not take its backings
@@ -166,9 +172,14 @@ create table if not exists listener_snapshots (
   artist_id   uuid not null references artists(id) on delete cascade,
   captured_on date not null,
   listeners   bigint not null,
+  -- Which provider this figure came from. Providers measure slightly differently, so if we
+  -- ever switch, old and new readings must stay tellable apart rather than silently mixing
+  -- into one growth line.
+  source      text not null default 'songstats',
 
   primary key (artist_id, captured_on),
-  constraint snapshots_listeners_sane check (listeners >= 0)
+  constraint snapshots_listeners_sane check (listeners >= 0),
+  constraint snapshots_source_valid check (source in ('songstats', 'soundcharts'))
 );
 
 create index if not exists listener_snapshots_by_date

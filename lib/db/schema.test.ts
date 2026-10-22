@@ -1,7 +1,7 @@
 import { PGlite } from "@electric-sql/pglite";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { BANDS, bandFor } from "../bands";
 
 const MIGRATION = readFileSync(
@@ -21,7 +21,10 @@ async function seedProfileAndArtist() {
   return { profileId: rows[0].id, artistId: artistRows[0].id };
 }
 
-beforeEach(async () => {
+// One database for the file, emptied between tests. Standing up a fresh Postgres per test
+// took about four seconds each, which pushed the suite past its timeout and made it slow
+// enough to start skipping — and a test suite nobody runs protects nothing.
+beforeAll(async () => {
   db = new PGlite();
   // auth.uid() is Supabase's; stub it so the policies parse the same way they will in prod.
   await db.exec(`
@@ -31,6 +34,14 @@ beforeEach(async () => {
     $$;
   `);
   await db.exec(MIGRATION);
+});
+
+beforeEach(async () => {
+  // TRUNCATE skips row-level triggers, so it can clear backings despite them being
+  // append-only — which is the point: no normal code path can.
+  await db.exec(
+    `truncate table follows, listener_snapshots, backings, artists, profiles restart identity cascade`
+  );
 });
 
 describe("migration", () => {
@@ -189,6 +200,56 @@ describe("the database refuses dishonest rows", () => {
     await expect(
       db.query(`insert into follows (follower_id, followee_id) values ($1, $1)`, [profileId])
     ).rejects.toThrow(/follows_not_self/i);
+  });
+});
+
+describe("provider provenance", () => {
+  // Providers measure slightly differently, so a switch must not silently blend two
+  // different measurements into one growth line.
+  it("records which provider a card's permanent number came from", async () => {
+    const { profileId, artistId } = await seedProfileAndArtist();
+    await db.query(
+      `insert into backings (profile_id, artist_id, listeners_at_backing, band_at_backing)
+       values ($1, $2, 48000, 1)`,
+      [profileId, artistId]
+    );
+    const { rows } = await db.query<{ listeners_source: string }>(
+      "select listeners_source from backings"
+    );
+    expect(rows[0].listeners_source).toBe("songstats");
+  });
+
+  it("records which provider each weekly snapshot came from", async () => {
+    const { artistId } = await seedProfileAndArtist();
+    await db.query(
+      `insert into listener_snapshots (artist_id, captured_on, listeners)
+       values ($1, current_date, 51000)`,
+      [artistId]
+    );
+    const { rows } = await db.query<{ source: string }>("select source from listener_snapshots");
+    expect(rows[0].source).toBe("songstats");
+  });
+
+  it("accepts a different provider, so switching is possible", async () => {
+    const { artistId } = await seedProfileAndArtist();
+    await expect(
+      db.query(
+        `insert into listener_snapshots (artist_id, captured_on, listeners, source)
+         values ($1, current_date, 51000, 'soundcharts')`,
+        [artistId]
+      )
+    ).resolves.toBeDefined();
+  });
+
+  it("rejects a provider nobody has agreed to", async () => {
+    const { artistId } = await seedProfileAndArtist();
+    await expect(
+      db.query(
+        `insert into listener_snapshots (artist_id, captured_on, listeners, source)
+         values ($1, current_date, 51000, 'guesswork')`,
+        [artistId]
+      )
+    ).rejects.toThrow(/source_valid/i);
   });
 });
 
