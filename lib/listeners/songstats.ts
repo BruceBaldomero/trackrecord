@@ -12,32 +12,40 @@
 const BASE = process.env.SONGSTATS_API_BASE ?? "https://api.songstats.com/enterprise/v1";
 
 export type ListenerResult =
-  | { state: "ok"; spotifyArtistId: string; monthlyListeners: number; raw: unknown }
-  /** Songstats authenticated us fine but doesn't carry this artist. Expected, not a fault. */
-  | { state: "not-tracked"; spotifyArtistId: string }
-  | { state: "error"; spotifyArtistId: string; message: string };
+  | { state: "ok"; artistId: string; monthlyListeners: number; raw: unknown }
+  /**
+   * Songstats authenticated us fine but has no figure yet. Per Songstats (27 Oct 2026),
+   * requesting an artist they don't hold enrols them and starts monitoring from that point,
+   * so this can be a temporary state for a brand-new artist rather than a permanent gap.
+   */
+  | { state: "not-tracked"; artistId: string }
+  | { state: "error"; artistId: string; message: string };
 
-export async function monthlyListenersFor(spotifyArtistId: string): Promise<ListenerResult> {
+export async function monthlyListenersFor(songstatsArtistId: string): Promise<ListenerResult> {
+  const artistId = songstatsArtistId;
   const key = process.env.SONGSTATS_API_KEY;
   if (!key) {
     return {
       state: "error",
-      spotifyArtistId,
+      artistId,
       message: "No Songstats key configured — set SONGSTATS_API_KEY in .env.local",
     };
   }
 
-  const url = `${BASE}/artists/stats?spotify_artist_id=${encodeURIComponent(
-    spotifyArtistId
+  const url = `${BASE}/artists/stats?songstats_artist_id=${encodeURIComponent(
+    artistId
   )}&source=spotify`;
 
   let response: Response;
   try {
-    response = await fetch(url, { headers: { apikey: key, Accept: "application/json" } });
+    response = await fetch(url, {
+      headers: { apikey: key, Accept: "application/json" },
+      signal: AbortSignal.timeout(8000),
+    });
   } catch (cause) {
     return {
       state: "error",
-      spotifyArtistId,
+      artistId,
       message: `Couldn't reach Songstats: ${(cause as Error).message}`,
     };
   }
@@ -49,20 +57,20 @@ export async function monthlyListenersFor(spotifyArtistId: string): Promise<List
   } catch {
     return {
       state: "error",
-      spotifyArtistId,
+      artistId,
       message: `Songstats returned ${response.status} and something that isn't JSON: ${body.slice(0, 200)}`,
     };
   }
 
   const message = (json as { message?: unknown })?.message;
   if (response.status === 404 || (typeof message === "string" && /not found/i.test(message))) {
-    return { state: "not-tracked", spotifyArtistId };
+    return { state: "not-tracked", artistId };
   }
 
   if (!response.ok) {
     return {
       state: "error",
-      spotifyArtistId,
+      artistId,
       message: `Songstats refused the request (${response.status}): ${body.slice(0, 300)}`,
     };
   }
@@ -71,14 +79,14 @@ export async function monthlyListenersFor(spotifyArtistId: string): Promise<List
   if (monthlyListeners === null) {
     return {
       state: "error",
-      spotifyArtistId,
+      artistId,
       message:
         "Songstats answered, but no monthly-listeners figure was found. The payload shape " +
         `differs from what was expected: ${body.slice(0, 300)}`,
     };
   }
 
-  return { state: "ok", spotifyArtistId, monthlyListeners, raw: json };
+  return { state: "ok", artistId, monthlyListeners, raw: json };
 }
 
 /**

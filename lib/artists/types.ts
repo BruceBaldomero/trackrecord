@@ -4,7 +4,7 @@
  * identified by `source` + `externalId` rather than by any one provider's ID.
  */
 
-export type ArtistSource = "musicbrainz";
+export type ArtistSource = "songstats" | "musicbrainz";
 
 export type ExternalArtist = {
   source: ArtistSource;

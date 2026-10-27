@@ -16,7 +16,7 @@ async function seedProfileAndArtist() {
     `insert into profiles (username, display_name) values ('bruce', 'Bruce') returning id`
   );
   const { rows: artistRows } = await db.query<{ id: string }>(
-    `insert into artists (source, external_id, name) values ('musicbrainz', 'mb-1', 'MIKE') returning id`
+    `insert into artists (source, external_id, name) values ('songstats', 'sg-1', 'MIKE') returning id`
   );
   return { profileId: rows[0].id, artistId: artistRows[0].id };
 }
@@ -182,7 +182,7 @@ describe("the database refuses dishonest rows", () => {
     await expect(
       db.query(
         `insert into artists (source, external_id, name, current_listeners, current_band)
-         values ('musicbrainz', 'mb-2', 'Wrong', 50000, 4)`
+         values ('songstats', 'sg-2', 'Wrong', 50000, 4)`
       )
     ).rejects.toThrow(/band_matches_listeners/i);
   });

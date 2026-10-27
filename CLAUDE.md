@@ -81,42 +81,41 @@ The project has to stay close to free while it's unvalidated.
   the rest just quietly stop moving.
 - Stay on free tiers (Supabase, Vercel) unless we agree otherwise.
 
-## Artist data source — Spotify is out; consolidating onto Songstats
+## Artist data source — Songstats, settled
 
 **Spotify's Web API is not available to this project.** Since Feb 2026 development mode is
 capped at **5 users** and requires the app owner to hold Spotify Premium; extended quota
-mode requires a registered organisation with **250k+ monthly active users**. A pre-launch
-consumer app cannot get from one to the other. Jack's proposal doc assumes free Spotify
-search — that assumption is wrong. Don't build a Spotify client.
+mode requires a registered organisation with **250k+ monthly active users**. Jack's
+proposal doc assumes free Spotify search — that assumption is wrong. Don't build a Spotify
+client.
 
-**What's running now:** MusicBrainz for artist search and identity, iTunes Search for
-artwork, Songstats for monthly listeners. Verified working end to end against a live
-server. Three weaknesses: MusicBrainz's ~1 req/sec limit makes search slow; iTunes is
-matched by *name*, so same-named artists can't be told apart and lose their artwork; and
-Songstats needs a Spotify ID, which is derived from an artist's MusicBrainz external links
-and is often missing for small artists.
+**Songstats is the single source** for artist search, artist info and monthly listeners,
+confirmed by Evan at Songstats on 27 Oct 2026. MusicBrainz and iTunes were an interim
+workaround and have been removed: they were slow (1 req/sec), matched artwork by *name* so
+same-named artists wore each other's photos, and depended on a Spotify ID that small
+artists often lacked.
 
-**Where it's going:** Songstats' own docs confirm `/artists/search` (returns name, their
-artist ID and an `avatar` image) and `/artists/info`. That makes Songstats a single source
-for search, images *and* listeners, removing all three weaknesses above and the ID bridge
-entirely.
-
-Blocked on Evan at Songstats confirming those endpoints are included and what they cost —
-the €0.025/unique artist quote was explicitly for "access only to" the monthly listeners
-endpoint. Asked 21 Oct 2026. **Don't rebuild onto those endpoints until he confirms.**
-
-Keep modelling artists as `source` + `external_id` so the provider can change without a
-migration.
+Keep modelling artists as `source` + `external_id` so the provider can still change without
+a migration.
 
 ## Verified facts about the Songstats API
 
-From their docs, confirmed against a live call:
+From their docs and confirmed directly with Songstats (27 Oct 2026):
 
+- **Search is free.** `GET /artists/search?q=` costs nothing, so it can run on every
+  keystroke. It returns `songstats_artist_id`, `name` and `avatar` per result.
+- **Info and stats are billed** per unique artist per calendar month (€0.025). Only call
+  them for an artist someone deliberately opened — never for a list of search results.
 - `GET /artists/stats` — `source` is **required** (e.g. `spotify`); identify the artist with
-  `songstats_artist_id`, `spotify_artist_id` or `apple_music_artist_id`.
-- Monthly listeners come back as `stats[].data.monthly_listeners_current`.
-- A missing artist returns 404 `{"result":"error","message":"Artist not found."}` — an
-  expected outcome for small artists, not a fault. Handle it, don't treat it as an error.
+  `songstats_artist_id`, `spotify_artist_id` or `apple_music_artist_id`. Monthly listeners
+  come back as `stats[].data.monthly_listeners_current`.
+- `GET /artists/info?songstats_artist_id=` returns `artist_info` with name, avatar, country,
+  bio and genres.
+- **Rate limits:** 10 requests/second per key; each artist may be requested up to 1,000
+  times per calendar month. A weekly refresh is well inside both.
+- **A 404 is not necessarily a permanent gap.** Requesting an artist Songstats doesn't hold
+  *enrols* them and starts monitoring from that point. So "not found" can mean "ask again
+  shortly", and a newly enrolled artist will have no history before that date.
 - The test key is limited to 20 unique artists.
 
 ## Testing
