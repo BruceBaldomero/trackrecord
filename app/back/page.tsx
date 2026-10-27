@@ -177,9 +177,8 @@ export default function BackPage() {
         )}
 
         <p className="mt-3 text-xs text-faint">
-          Several artists often share a name. Open one to see their listener count and
-          disambiguation before you commit — artwork is hidden where a name isn&apos;t unique,
-          rather than risk showing you the wrong act.
+          Several artists often share a name. Open one to see their listener count and where
+          they&apos;re from before you commit.
         </p>
       </div>
     </div>
